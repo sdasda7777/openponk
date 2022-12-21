@@ -20,9 +20,11 @@ BaselineOfOpenPonk >> baseline: spec [
 			with: [ spec requires: #( 'Roassal2' ) ];
 			package: 'OpenPonk-Roassal2'
 			with: [ spec requires: #( 'OpenPonk-Trachel' ) ];
+			package: 'OpenPonk-Roassal3'
+			with: [ spec requires: #( 'Roassal3' ) ];
 			package: 'OpenPonk-Core' with: [ 
 				spec requires:
-						#( 'Magritte' 'Mocketry' 'XMLParser' 'XPath' 'NeoJSON' 'OpenPonk-Roassal2' ) ];
+						#( 'Magritte' 'Mocketry' 'XMLParser' 'XPath' 'NeoJSON' 'OpenPonk-Roassal2' 'OpenPonk-Roassal3' ) ];
 			package: 'OpenPonk-Morphic';
 			package: 'OpenPonk-Spec' with: [ 
 				spec requires:
@@ -31,7 +33,7 @@ BaselineOfOpenPonk >> baseline: spec [
 			preLoadDoIt: #loadPetitParser.
 		spec
 			group: 'default'
-			with: #( 'OpenPonk-Core' 'OpenPonk-Roassal2' 'OpenPonk-Morphic'
+			with: #( 'OpenPonk-Core' 'OpenPonk-Morphic'
 				   'OpenPonk-Spec' ) ]
 ]
 
@@ -52,6 +54,16 @@ BaselineOfOpenPonk >> externalProjectsBaseline: spec [
 		with: [ spec
 				repository: 'github://OpenPonk/Roassal2:Pharo10';
 				loads: #(Core) ].
+	spec
+		baseline: 'Roassal3'
+		with: [ spec
+				repository: 'github://ObjectProfile/Roassal3:v0.9.9k';
+				loads: #(Full) ].
+	spec
+		baseline: 'Roassal3Exporters'
+		with: [ spec
+			requires: 'Roassal3';
+				repository: 'github://ObjectProfile/Roassal3Exporters:f2f81e9' ].
 	spec
 		baseline: 'Magritte'
 		with: [ spec
