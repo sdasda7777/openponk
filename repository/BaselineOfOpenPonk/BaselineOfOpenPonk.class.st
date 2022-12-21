@@ -20,9 +20,11 @@ BaselineOfOpenPonk >> baseline: spec [
 			with: [ spec requires: #( 'Roassal2' ) ];
 			package: 'OpenPonk-Roassal2'
 			with: [ spec requires: #( 'OpenPonk-Trachel' ) ];
+			package: 'OpenPonk-Roassal3'
+			with: [ spec requires: #( 'Roassal3' 'Roassal3Exporters' ) ];
 			package: 'OpenPonk-Core' with: [ 
 				spec requires:
-						#( 'Magritte' 'Mocketry' 'XMLParser' 'XPath' 'NeoJSON' 'OpenPonk-Roassal2' ) ];
+						#( 'Magritte' 'Mocketry' 'XMLParser' 'XPath' 'NeoJSON' 'OpenPonk-Roassal2' 'OpenPonk-Roassal3' ) ];
 			package: 'OpenPonk-Morphic';
 			package: 'OpenPonk-Spec' with: [ 
 				spec requires:
@@ -31,43 +33,57 @@ BaselineOfOpenPonk >> baseline: spec [
 			preLoadDoIt: #loadPetitParser.
 		spec
 			group: 'default'
-			with: #( 'OpenPonk-Core' 'OpenPonk-Roassal2' 'OpenPonk-Morphic'
+			with: #( 'OpenPonk-Core' 'OpenPonk-Morphic'
 				   'OpenPonk-Spec' ) ]
 ]
 
 { #category : #baselines }
 BaselineOfOpenPonk >> externalProjectsBaseline: spec [
+
+	spec baseline: 'XMLParser' with: [ 
+		spec
+			repository: 'github://pharo-contributions/XML-XMLParser:3.5.x/src';
+			loads: #( Core ) ].
+
+	spec baseline: 'XPath' with: [ 
+		spec
+			repository: 'github://pharo-contributions/XML-XPath:3450f91/src';
+			loads: #( Core ) ].
+
+	spec baseline: 'Roassal2' with: [ 
+		spec
+			repository: 'github://OpenPonk/Roassal2:Pharo10';
+			loads: #( Core ) ].
+
+	spec baseline: 'Roassal3' with: [ 
+		spec
+			repository: 'github://ObjectProfile/Roassal3:v0.9.9k';
+			loads: #( Full ) ].
+
 	spec
-		baseline: 'XMLParser'
-		with: [ spec
-				repository: 'github://pharo-contributions/XML-XMLParser:3.5.x/src';
-				loads: #(Core) ].
-	spec
-		baseline: 'XPath'
-		with: [ spec
-				repository: 'github://pharo-contributions/XML-XPath:3450f91/src';
-				loads: #(Core) ].
-	spec
-		baseline: 'Roassal2'
-		with: [ spec
-				repository: 'github://OpenPonk/Roassal2:Pharo10';
-				loads: #(Core) ].
-	spec
-		baseline: 'Magritte'
-		with: [ spec
-				repository: 'github://JanBliznicenko/magritte:fix-spec-usage/source';
-				loads: #(Core 'Magritte-Morph') ].
-	spec
-		baseline: 'Moose'
-		with: [ spec
-				repository: 'github://moosetechnology/Moose:v9.0.1/src';
-				loads: #(Merlin) ].
+		baseline: 'Roassal3Exporters'
+		with: [ 
+		spec repository: 'github://ObjectProfile/Roassal3Exporters:f2f81e9' ].
+
+	spec baseline: 'Magritte' with: [ 
+		spec
+			repository:
+				'github://JanBliznicenko/magritte:fix-spec-usage/source';
+			loads: #( Core 'Magritte-Morph' ) ].
+
+	spec baseline: 'Moose' with: [ 
+		spec
+			repository: 'github://moosetechnology/Moose:v9.0.1/src';
+			loads: #( Merlin ) ].
+
 	spec
 		baseline: 'Mocketry'
 		with: [ spec repository: 'github://dionisiydk/Mocketry:v7.0.1' ].
+
 	spec
 		baseline: 'NeoJSON'
-		with: [ spec repository: 'github://svenvc/NeoJSON:109d08b/repository' ]
+		with: [ 
+		spec repository: 'github://svenvc/NeoJSON:109d08b/repository' ]
 ]
 
 { #category : #baselines }
