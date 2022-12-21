@@ -21,20 +21,19 @@ BaselineOfOpenPonk >> baseline: spec [
 			package: 'OpenPonk-Roassal2'
 			with: [ spec requires: #( 'OpenPonk-Trachel' ) ];
 			package: 'OpenPonk-Roassal3'
-			with: [ spec requires: #( 'Roassal3' 'Roassal3Exporters' ) ];
+			with: [ spec preLoadDoIt: #loadRoassal3 ];
 			package: 'OpenPonk-Core' with: [ 
 				spec requires:
-						#( 'Magritte' 'Mocketry' 'XMLParser' 'XPath' 'NeoJSON' 'OpenPonk-Roassal2' 'OpenPonk-Roassal3' ) ];
+						#( 'Magritte' 'Mocketry' 'XMLParser' 'XPath' 'NeoJSON' 'OpenPonk-Roassal2'
+						   'OpenPonk-Roassal3' ) ];
 			package: 'OpenPonk-Morphic';
 			package: 'OpenPonk-Spec' with: [ 
 				spec requires:
 						#( 'Moose' 'NewTools' 'Magritte' 'SynchronizedLinks'
-						   'OpenPonk-Morphic' ) ];
-			preLoadDoIt: #loadPetitParser.
+						   'OpenPonk-Morphic' );  preLoadDoIt: #loadPetitParserAndRoassal3 ].
 		spec
 			group: 'default'
-			with: #( 'OpenPonk-Core' 'OpenPonk-Morphic'
-				   'OpenPonk-Spec' ) ]
+			with: #( 'OpenPonk-Core' 'OpenPonk-Morphic' 'OpenPonk-Spec' ) ]
 ]
 
 { #category : #baselines }
@@ -54,16 +53,6 @@ BaselineOfOpenPonk >> externalProjectsBaseline: spec [
 		spec
 			repository: 'github://OpenPonk/Roassal2:Pharo10';
 			loads: #( Core ) ].
-
-	spec baseline: 'Roassal3' with: [ 
-		spec
-			repository: 'github://ObjectProfile/Roassal3:v0.9.9k';
-			loads: #( Full ) ].
-
-	spec
-		baseline: 'Roassal3Exporters'
-		with: [ 
-		spec repository: 'github://ObjectProfile/Roassal3Exporters:f2f81e9' ].
 
 	spec baseline: 'Magritte' with: [ 
 		spec
@@ -111,4 +100,32 @@ BaselineOfOpenPonk >> loadPetitParser [
 		load:
 			#( 'Core' 'Tests' 'Examples' 'Islands' 'Analyzer' 'Preprocessor'
 			   'Indent' 'Extension' 'TestsExtension' 'Parser' )
+]
+
+{ #category : #baselines }
+BaselineOfOpenPonk >> loadPetitParserAndRoassal3 [
+
+	"PetitParser is not needed by core OP. It is needed by BormEditor, but due to Pharo bug https://github.com/pharo-project/pharo/issues/9913 it must be always loaded before Roassal in Pharo 10"
+
+	self
+		loadPetitParser;
+		loadRoassal3
+]
+
+{ #category : #baselines }
+BaselineOfOpenPonk >> loadRoassal3 [
+
+	"Roassal3 needs to be loaded this way because different version of it is already included in Pharo 10+"
+
+	Smalltalk at: #BaselineOfRoassal3Exporters ifPresent: [ ^ self ].
+	Metacello new
+		baseline: 'Roassal3';
+		repository: 'github://ObjectProfile/Roassal3:v0.9.9k';
+		lock;
+		onConflictUseIncoming;
+		load: #Full.
+	Metacello new
+		baseline: 'Roassal3Exporters';
+		repository: 'github://ObjectProfile/Roassal3Exporters:f2f81e9';
+		load
 ]
