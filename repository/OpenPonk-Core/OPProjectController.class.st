@@ -389,7 +389,7 @@ OPProjectController >> updateDiagram: aDiagram [
 			aDiagram layout: ctrl layout.
 			aDiagram visibleElements: ctrl visibleElements copy.
 			aDiagram commonElements: ctrl commonElements.
-			aDiagram updateFromRoassalView: ctrl view.
+			aDiagram updateFromRoassalCanvas: ctrl view.
 			aDiagram order: (controllers indexOf: ctrl) ]
 		ifNone: [ 
 			aDiagram
@@ -412,7 +412,7 @@ OPProjectController >> updateDiagrams [
 					eachDiagram layout: ctrl layout copy.
 					eachDiagram commonElements: ctrl commonElements.
 					eachDiagram visibleElements: ctrl visibleElements copy.
-					eachDiagram updateFromRoassalView: ctrl view.
+					eachDiagram updateFromRoassalCanvas: ctrl view.
 					eachDiagram order: (controllers indexOf: ctrl).
 					eachDiagram isSelected: ctrl = focusedController ]
 				ifNone: [ eachDiagram

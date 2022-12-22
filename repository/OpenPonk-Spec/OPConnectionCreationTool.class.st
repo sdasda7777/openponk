@@ -72,7 +72,7 @@ OPConnectionCreationTool >> sourceSelected: aController [
 		ifFalse: [ ^ self ].
 	aController addAsSourceFor: connectionController.
 	connectionFeedback := connectionController connectionFeedback.
-	connectionFeedback renderIn: aController figure view.
+	connectionFeedback renderIn: aController figure canvas.
 	self selectTarget
 ]
 

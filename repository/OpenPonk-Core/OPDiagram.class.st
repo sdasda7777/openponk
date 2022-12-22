@@ -281,7 +281,7 @@ OPDiagram >> updateFromInfo: anInfo [
 ]
 
 { #category : #accessing }
-OPDiagram >> updateFromRoassalView: aView [
+OPDiagram >> updateFromRoassalCanvas: aView [
 	self
 		camera:
 			(OPDiagramCamera new

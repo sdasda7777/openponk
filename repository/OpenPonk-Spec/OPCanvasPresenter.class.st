@@ -3,9 +3,9 @@ I am Spec model to embed Roassal2 into DCEditor.
 "
 Class {
 	#name : #OPCanvasPresenter,
-	#superclass : #SpRoassal2Presenter,
+	#superclass : #SpRoassalPresenter,
 	#instVars : [
-		'roassalView',
+		'roassalCanvas',
 		'diagramController',
 		'lastClickPosition',
 		'onZoomChange',
@@ -57,27 +57,45 @@ OPCanvasPresenter >> addMouseEventsFor: aFigure [
 		when: TRMouseLeave
 		do: [ :event | 
 			self lastClickPosition: event position.
-			self diagramController hoverView ]
+			self diagramController hoverCanvas ]
 ]
 
 { #category : #accessing }
 OPCanvasPresenter >> attachController: aDiagramController [
 
 	(diagramController := aDiagramController)
-		view: roassalView;
+		canvas: self canvas;
 		whenFigureAdded: [ :figure | self figureAdded: figure ];
 		whenAllDeselectedDo: [ self lastSelectedFigure: nil ]
+]
+
+{ #category : #'selection handling' }
+OPCanvasPresenter >> canvasClicked: anEvent [
+	self lastClickPosition: anEvent position.
+	self diagramController selectCanvas
+]
+
+{ #category : #'selection handling' }
+OPCanvasPresenter >> canvasContextClicked: anEvent [
+
+	(OPPragmaPluginMenuBuilder
+		 pragmaKeyword: #opCanvasContextMenu:
+		 model: self) menuSpec asMenuMorph popUpInWorld
+]
+
+{ #category : #private }
+OPCanvasPresenter >> cleanCanvas [
+
+	self canvas shapes copy do: #remove.
 ]
 
 { #category : #private }
 OPCanvasPresenter >> cleanView [
 
-	"roassalView cleanAll is unusable because it breaks (maybe) misused TRRemoveCallbacks"
-
-	roassalView edges copy do: #remove.
-	roassalView elements copy do: #remove.
-	roassalView canvas shapes copy do: [ :each | 
-		(each isKindOf: TRCanvasGridShape) ifFalse: [ each remove ] ]
+	self
+		deprecated: 'Use #cleanCanvas instead.'
+		transformWith: '`@receiver cleanView' -> '`@receiver cleanCanvas'.
+	^ self cleanCanvas
 ]
 
 { #category : #'private-focus' }
@@ -154,7 +172,7 @@ OPCanvasPresenter >> exportCanvasToPng: aFile silently: aSilentlyBoolean [
 
 	self
 		exportCanvasToPng: aFile
-		zoom: TRCamera basicNew defaultCameraScale
+		zoom: 1.000000
 		silently: aSilentlyBoolean
 ]
 
@@ -167,16 +185,15 @@ OPCanvasPresenter >> exportCanvasToPng: aFileReference zoom: aNumber [
 { #category : #toolbar }
 OPCanvasPresenter >> exportCanvasToPng: aFileReference zoom: aNumber silently: aSilentlyBoolean [
 
-	| gridShape gridColor zoom view approxResolution jobBlock |
+	| gridShape originalGridColor originalZoom zoom approxResolution jobBlock |
 	self ifFileNameNotCompatible: aFileReference do: [ ^ self ].
-	view := roassalView.
 	approxResolution := aNumber * aNumber
-	                    * view canvas encompassingRectangle area.
-	zoom := (aNumber squared * view canvas encompassingRectangle area
+	                    * self canvas encompassingRectangle area.
+	zoom := (aNumber squared * self canvas encompassingRectangle area
 	         > 500000000
 		         ifTrue: [ 
-			         (500000000 / view canvas encompassingRectangle area) sqrt 
-				         roundDownTo: 0.01 ]
+			         (500000000 / self canvas encompassingRectangle area)
+				         sqrt roundDownTo: 0.01 ]
 		         ifFalse: [ aNumber ]) max: 0.01.
 
 	(aSilentlyBoolean not and: [ (aNumber - zoom) abs > 0.011 ]) ifTrue: [ 
@@ -188,17 +205,16 @@ OPCanvasPresenter >> exportCanvasToPng: aFileReference zoom: aNumber silently: a
 			backgroundColor: GrowlMorph theme warningBackgroundColor
 			labelColor: GrowlMorph theme textColor ].
 
-	zoom = 1 ifTrue: [ zoom := 1.01 ].
-
-	gridShape := view canvas shapes detect: [ :each | 
+	gridShape := self canvas shapes detect: [ :each | 
 		             each isKindOf: TRCanvasGridShape ].
-	gridColor := gridShape color.
+	originalGridColor := gridShape color.
+	originalZoom := self canvas camera scale.
 	self diagramController deselectAll.
 
 	jobBlock := [ :job | 
 	            approxResolution := zoom * zoom
 	                                *
-	                                view canvas encompassingRectangle
+	                                self canvas encompassingRectangle
 		                                area.
 	            job title:
 		            'Exporting diagram - might take '
@@ -210,19 +226,16 @@ OPCanvasPresenter >> exportCanvasToPng: aFileReference zoom: aNumber silently: a
 						             ifFalse: [ 'a few seconds' ] ]).
 	            [ 
 	            gridShape color: Color transparent.
-	            (zoom - view canvas camera scale) abs >= 0.01 ifTrue: [ 
-		            view := view veryDeepCopy.
-		            view canvas camera scale: zoom.
-		            job progress: 0.2 ].
+	            self canvas camera scale: zoom.
 
-	            RTPNGExporter new
-		            builder: view;
-		            withScale;
+	            self canvas pngExporter 
 		            fileName: aFileReference pathString;
-		            exportToFile ] ensure: [ 
+		            export ] ensure: [ 
 		            job progress: 0.8.
-		            gridShape color: gridColor.
-		            view signalUpdate ] ].
+		            originalZoom ifNotNil: [ 
+			            self canvas camera scale: originalZoom ].
+		            gridShape color: originalGridColor.
+		            self canvas signalUpdate ] ].
 
 	aSilentlyBoolean ifTrue: [ ^ jobBlock value: Job new ].
 	jobBlock asJob run.
@@ -246,13 +259,11 @@ OPCanvasPresenter >> exportCanvasToSvg: aFileReference [
 { #category : #toolbar }
 OPCanvasPresenter >> exportCanvasToSvg: aFileReference silently: aSilentlyBoolean [
 
-	| view amountOfElements jobBlock |
-	view := roassalView.
-
+	| amountOfElements jobBlock |
 	self diagramController deselectAll.
 
 	jobBlock := [ :job | 
-	            amountOfElements := view elements size.
+	            amountOfElements := self canvas elements size.
 	            job title:
 		            'Exporting diagram - might take '
 		            , (amountOfElements > 5000
@@ -262,9 +273,9 @@ OPCanvasPresenter >> exportCanvasToSvg: aFileReference silently: aSilentlyBoolea
 						             ifTrue: [ 'several seconds' ]
 						             ifFalse: [ 'a few seconds' ] ]).
 
-	            RTSVGExporter
-		            exportViewAsSVG: view
-		            filename: aFileReference ].
+	            self canvas svgExporter
+		            filename: aFileReference;
+		            export ].
 
 	aSilentlyBoolean ifTrue: [ ^ jobBlock value: Job new ].
 	jobBlock asJob run.
@@ -320,38 +331,32 @@ OPCanvasPresenter >> initialize [
 
 	super initialize.
 	onZoomChange := [ :value |  ].
-	self script: [ :view :canvas | 
-		roassalView := view.
-		self initializeView: view ]
+	self script: [ :canvas | self initializeCanvas: canvas ]
 ]
 
 { #category : #initialization }
-OPCanvasPresenter >> initializeView: aView [
-	aView when: TRMouseLeftClick do: [ :event | self viewClicked: event ].
-	aView
-		when: TRMouseRightClick
-		do: [ :event | self viewContextClicked: event ].
-	aView canvas theme: TRWhiteTheme new.
-	aView
-		@
-			(OPRTSelectableView new
-				candidatesBlock: [ diagramController selectableFigures ]).
-	aView @ (RTZoomableView new min: 0.05 max: 4).
-	aView @ (RTGridView new gridSize: 20).
-	^ aView canvas camera
-		addCallback:
-			(TRCameraScaleCallback
-				block: [ :newScale | 
-					onZoomChange
-						value:
-							(newScale < 1
-								ifTrue: [ '   ' ]
-								ifFalse: [ '' ]) , (newScale * 100) rounded asString , '%'.
-					self editor zoomLabel
-						label:
-							(newScale < 1
-								ifTrue: [ '   ' ]
-								ifFalse: [ '' ]) , (newScale * 100) rounded asString , '%' ])
+OPCanvasPresenter >> initializeCanvas: aCanvas [
+
+	aCanvas
+		when: RSMouseLeftClick
+		do: [ :event | self canvasClicked: event ].
+	aCanvas
+		when: RSMouseRightClick
+		do: [ :event | self canvasContextClicked: event ].
+	aCanvas @ (OPRSElasticBoxInteraction withCandidatesBlock: [ 
+		 diagramController selectableFigures ]).
+	aCanvas @ RSZoomableCanvasInteraction.
+	self flag: #TODO_R3.
+	"aCanvas @ (RTGridView new gridSize: 20)."
+	^ aCanvas when: RSScaleChangedEvent do: [ :event | 
+		  onZoomChange value: (event newScale < 1
+				   ifTrue: [ '   ' ]
+				   ifFalse: [ '' ]) , (event newScale * 100) rounded asString
+			  , '%'.
+		  self editor zoomLabel label: (event newScale < 1
+				   ifTrue: [ '   ' ]
+				   ifFalse: [ '' ]) , (event newScale * 100) rounded asString
+			  , '%' ]
 ]
 
 { #category : #events }
@@ -401,14 +406,19 @@ OPCanvasPresenter >> reloadView [
 
 { #category : #accessing }
 OPCanvasPresenter >> roassalView [
-	^ roassalView
+
+	self
+		deprecated: 'Use #canvas instead.'
+		transformWith:
+		'`@receiver roassalView' -> '`@receiver canvas'.
+	^ self canvas
 ]
 
 { #category : #accessing }
 OPCanvasPresenter >> selectedElements [
 
-	roassalView attributes
-		at: OPRTSelectableView
+	self canvas
+		propertyAt: OPRSElasticBoxInteraction
 		ifPresent: [ :els | els ifNotEmpty: [ ^ els ] ].
 	^ self lastSelectedFigure
 		  ifNil: [ {  } ]
@@ -418,28 +428,14 @@ OPCanvasPresenter >> selectedElements [
 { #category : #'as yet unclassified' }
 OPCanvasPresenter >> showAllFigures [
 
-	roassalView elements
-		ifEmpty: [ roassalView canvas camera scale: 1 ]
-		ifNotEmpty: [ roassalView canvas focusOnCenterScaled ]
+	self canvas elements
+		ifEmpty: [ self canvas camera scale: 1 ]
+		ifNotEmpty: [ self canvas focusOnCenterScaled ]
 ]
 
 { #category : #signalling }
 OPCanvasPresenter >> signalUpdate [
-	roassalView signalUpdate
-]
-
-{ #category : #'selection handling' }
-OPCanvasPresenter >> viewClicked: anEvent [
-	self lastClickPosition: anEvent position.
-	self diagramController selectView
-]
-
-{ #category : #'selection handling' }
-OPCanvasPresenter >> viewContextClicked: anEvent [
-
-	(OPPragmaPluginMenuBuilder
-		 pragmaKeyword: #opCanvasContextMenu:
-		 model: self) menuSpec asMenuMorph popUpInWorld
+	self canvas signalUpdate
 ]
 
 { #category : #accessing }
@@ -454,19 +450,19 @@ OPCanvasPresenter >> workbench [
 
 { #category : #accessing }
 OPCanvasPresenter >> zoom [
-	"1: default zoom (it should be 1.0001, but who cares)
-	2: zoomed in to 200%"
+	"1: default zoom
+	 2: zoomed in to 200%"
 
-	^ roassalView canvas camera scale
+	^ self canvas camera scale
 ]
 
 { #category : #accessing }
 OPCanvasPresenter >> zoom: aScale [
-	"1: default zoom (it should be 1.0001, but who cares)
-	2: zoomed in to 200%"
+	"1: default zoom
+	 2: zoomed in to 200%"
 
 	(aScale between: 0.05 and: 4)
 		ifFalse: [ ^ self ].
-	roassalView canvas camera scale: aScale.
-	roassalView signalUpdate
+	self canvas camera scale: aScale.
+	self canvas signalUpdate
 ]

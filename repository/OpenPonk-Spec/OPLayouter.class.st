@@ -160,9 +160,21 @@ OPLayouter >> treeLayout [
 ]
 
 { #category : #userinterface }
+OPLayouter >> updateCanvas [
+
+	| canvas |
+	canvas := diagramController canvas.
+	canvas signalUpdate.
+	canvas shapes ifNotEmpty: [ canvas camera zoomToFit ]
+]
+
+{ #category : #userinterface }
 OPLayouter >> updateView [
-	| view |
-	view := diagramController view.
-	view signalUpdate.
-	view canvas camera focusOnCenter
+
+	self
+		deprecated: 'Use #updateCanvas instead.'
+		transformWith:
+		'`@receiver updateView'
+		-> '`@receiver updateCanvas'.
+	^ self updateCanvas
 ]

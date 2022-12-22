@@ -125,13 +125,13 @@ OPDiagramTest >> testNewCopy [
 
 { #category : #tests }
 OPDiagramTest >> testUpdateFromRoassalView [
-	| roassalView |
+	| roassalCanvas |
 	view := OPDiagram new.
-	roassalView := RTView new.
-	roassalView canvas camera
+	roassalCanvas := RSCanvas new.
+	roassalCanvas camera
 		translateTo: 200 @ 27;
 		scale: 0.23.
-	view updateFromRoassalView: roassalView.
+	view updateFromRoassalCanvas: roassalCanvas.
 	self assert: view camera offset equals: 200 @ 27.
 	self assert: view camera zoom equals: 0.23
 ]

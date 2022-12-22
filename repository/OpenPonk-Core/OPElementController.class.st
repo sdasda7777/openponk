@@ -136,7 +136,7 @@ OPElementController >> remove [
 ]
 
 { #category : #construction }
-OPElementController >> renderFigureIn: aView [
+OPElementController >> renderFigureIn: aCanvas [
 	^ self subclassResponsibility
 ]
 
@@ -161,8 +161,9 @@ OPElementController >> showSelectionFeedback [
 
 { #category : #construction }
 OPElementController >> showWithoutDependentInDiagram: aDiagramController [
+
 	aDiagramController addController: self.
-	self renderFigureIn: aDiagramController view
+	self renderFigureIn: aDiagramController canvas
 ]
 
 { #category : #accessing }

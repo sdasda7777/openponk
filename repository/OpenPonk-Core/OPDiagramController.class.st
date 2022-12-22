@@ -18,10 +18,10 @@ Class {
 		'modelToControllerCache',
 		'workbenchAnnouncer',
 		'diagram',
-		'view',
 		'layouter',
 		'figuresBeingAdded',
-		'controllerFactory'
+		'controllerFactory',
+		'canvas'
 	],
 	#category : #'OpenPonk-Core-Controllers'
 }
@@ -191,14 +191,33 @@ OPDiagramController >> canBeTargetFor: aController [
 		and: [ aController class ~= OPCommonElementController ]
 ]
 
+{ #category : #accessing }
+OPDiagramController >> canvas [
+	^ canvas
+]
+
+{ #category : #accessing }
+OPDiagramController >> canvas: aCanvas [
+
+	canvas := aCanvas
+]
+
+{ #category : #rebuilding }
+OPDiagramController >> cleanCanvas [
+
+	self flag: #TODO_R3.
+	self canvas shapes copy do: [ :each | 
+		(each isKindOf: TRCanvasGridShape) ifFalse: [ each remove ] ].
+	self canvas fixedShapes copy do: #remove
+]
+
 { #category : #rebuilding }
 OPDiagramController >> cleanView [
-	self view clean.
-	self view canvas shapes copy
-		do: [ :each | 
-			(each isKindOf: TRCanvasGridShape)
-				ifFalse: [ each remove ] ].
-	self view canvas fixedShapes copy do: #remove
+
+	self
+		deprecated: 'Use #cleanCanvas instead.'
+		transformWith: '`@receiver cleanView' -> '`@receiver cleanCanvas'.
+	^ self cleanCanvas
 ]
 
 { #category : #accessing }
@@ -273,7 +292,7 @@ OPDiagramController >> createController: aModel [
 { #category : #'protocol-canvas' }
 OPDiagramController >> deselectAll [
 
-	view announce: TRResizeCanceled new.
+	canvas announce: TRResizeCanceled new.
 	self announcer announce: OPAllFiguresDeselected new
 ]
 
@@ -330,7 +349,7 @@ OPDiagramController >> enableRefresh [
 
 { #category : #accessing }
 OPDiagramController >> figure [
-	^ self view
+	^ self canvas
 ]
 
 { #category : #accessing }
@@ -391,8 +410,8 @@ OPDiagramController >> hideAllElements [
 
 	[ self controllers isNotEmpty ] whileTrue: [ 
 		self controllers anyOne removeController ].
-	self cleanView.
-	self view signalUpdate
+	self cleanCanvas.
+	self canvas signalUpdate
 ]
 
 { #category : #figures }
@@ -403,15 +422,15 @@ OPDiagramController >> hideModelFromDiagram: aModel [
 ]
 
 { #category : #'protocol-canvas' }
+OPDiagramController >> hoverCanvas [
+	hoverHolder value: self
+]
+
+{ #category : #'protocol-canvas' }
 OPDiagramController >> hoverFigure: aFigure [
 	| controller |
 	controller := self controllerForFigure: aFigure.
 	hoverHolder value: controller
-]
-
-{ #category : #'protocol-canvas' }
-OPDiagramController >> hoverView [
-	hoverHolder value: self
 ]
 
 { #category : #'ui interaction' }
@@ -545,12 +564,12 @@ OPDiagramController >> rebuild [
 	controllers := nil.
 	[ :job | 
 	job title: 'Preparing diagram'.
-	self cleanView.
+	self cleanCanvas.
 	diagram ifNil: [ 
 		^ self showDiagram: (OPDiagram withWholeModel: model) ].
 	diagram camera ifNotNil: [ :camera | 
-		view canvas camera translateTo: camera offset.
-		view canvas camera scale: camera zoom ].
+		canvas camera translateTo: camera offset.
+		canvas camera scale: camera zoom ].
 	self addCommonElementsFromDiagram.
 	self showElements.
 	diagram layout
@@ -602,7 +621,7 @@ OPDiagramController >> removeControllerOf: aModelElement [
 OPDiagramController >> removeFigure [
 
 	self removeAllControllers.
-	self figure view ifNotNil: [ self figure cleanAll ]
+	self figure ifNotNil: [ self figure shapes copy do: #remove ]
 ]
 
 { #category : #deprecated }
@@ -646,6 +665,11 @@ OPDiagramController >> saveState [
 	self editor workbench projectController autoSave: memento"
 ]
 
+{ #category : #'protocol-canvas' }
+OPDiagramController >> selectCanvas [
+	selectionHolder value: self
+]
+
 { #category : #'ui interaction' }
 OPDiagramController >> selectController: aController [
 	self editor palette selectSelectionTool selectedTool targetSelected: aController
@@ -656,11 +680,6 @@ OPDiagramController >> selectFigure: aFigure [
 	| controller |
 	controller := self controllerForFigure: aFigure.
 	selectionHolder value: controller
-]
-
-{ #category : #'protocol-canvas' }
-OPDiagramController >> selectView [
-	selectionHolder value: self
 ]
 
 { #category : #figures }
@@ -722,18 +741,39 @@ OPDiagramController >> undo [
 ]
 
 { #category : #userinterface }
-OPDiagramController >> updateView [
+OPDiagramController >> updateCanvas [
 	self controllers do: [ :each | each refreshFigure ]
+]
+
+{ #category : #userinterface }
+OPDiagramController >> updateView [
+
+	self
+		deprecated: 'Use #updateCanvas instead.'
+		transformWith:
+		'`@receiver updateView'
+		-> '`@receiver updateCanvas'.
+	^ self updateCanvas
 ]
 
 { #category : #accessing }
 OPDiagramController >> view [
-	^ view
+
+	self
+		deprecated: 'Use #canvas instead.'
+		transformWith: '`@receiver view' -> '`@receiver canvas'.
+	^ self canvas
 ]
 
 { #category : #accessing }
 OPDiagramController >> view: aView [
-	view := aView
+
+	self
+		deprecated: 'Use #canvas: instead.'
+		transformWith:
+		'`@receiver view: `@statements1'
+		-> '`@receiver canvas: `@statements1'.
+	^ self canvas: aView
 ]
 
 { #category : #accessing }
