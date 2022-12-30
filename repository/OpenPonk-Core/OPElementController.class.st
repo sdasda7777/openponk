@@ -132,7 +132,7 @@ OPElementController >> remove [
 		deprecated: 'Use #removeController instead.'
 		transformWith: '`@receiver remove' -> '`@receiver removeController'.
 
-	self removeController
+	^ self removeController
 ]
 
 { #category : #construction }

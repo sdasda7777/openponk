@@ -6,8 +6,7 @@ Class {
 	#name : #OPSelectionTool,
 	#superclass : #OPPaletteTool,
 	#instVars : [
-		'selectedController',
-		'isDiagramControllerSubscribed'
+		'selectedControllers'
 	],
 	#category : #'OpenPonk-Spec-Palettes'
 }
@@ -15,9 +14,9 @@ Class {
 { #category : #protocol }
 OPSelectionTool >> deselect [
 
-	selectedController hideSelectionFeedback.
-	selectedController := OPPaletteNullController new.
-	self editor openFormOn: nil
+	(self diagramController canvas propertyAt: OPRSSelectableCanvas)
+		disableMultiselect.
+	self selectedControllers: { }
 ]
 
 { #category : #accessing }
@@ -26,26 +25,25 @@ OPSelectionTool >> palette: aPalette [
 	palette ifNotNil: [ 
 		self diagramController ifNotNil: [ 
 			self diagramController announcer unsubscribe: self ] ].
-	super palette: aPalette.
-	isDiagramControllerSubscribed := false
+	super palette: aPalette
 ]
 
 { #category : #protocol }
 OPSelectionTool >> select [
 
-	selectedController := OPPaletteNullController new.
-	self diagramController whenHoverChanged: [ :ctrl |  ].
-	self diagramController whenSelectionChanged: [ :ctrl | 
-		self targetSelected: ctrl ]
+	selectedControllers := {  }
 ]
 
 { #category : #protocol }
-OPSelectionTool >> targetSelected: aController [
+OPSelectionTool >> selectedControllers: aCollectionOfControllers [
 
-	selectedController hideSelectionFeedback.
-	(selectedController := aController) showSelectionFeedback.
-	isDiagramControllerSubscribed ifFalse: [ 
-		self diagramController whenAllDeselectedDo: [ self deselect ].
-		isDiagramControllerSubscribed := true ].
-	self editor openFormOn: selectedController
+	selectedControllers , aCollectionOfControllers
+		detect: [ :any | any hasProperty: OPRSSelectable ]
+		ifFound: [ :ctrl | 
+			(ctrl propertyAt: OPRSSelectable) doHighlightShapes:
+				(aCollectionOfControllers collect: #figure) ].
+	selectedControllers := aCollectionOfControllers.
+	self editor openFormOn: (aCollectionOfControllers size = 1
+			 ifTrue: [ aCollectionOfControllers anyOne ]
+			 ifFalse: [ nil ])
 ]

@@ -229,8 +229,9 @@ OPController >> removeDependentControllers [
 
 { #category : #destruction }
 OPController >> removeFigure [
+
 	self diagramController deselectAll.
-	self figure view ifNotNil: [ self figure remove ]
+	self figure canvas ifNotNil: [ self figure remove ]
 ]
 
 { #category : #destruction }

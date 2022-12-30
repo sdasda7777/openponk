@@ -17,12 +17,12 @@ Class {
 OPDirectionalRelationshipController >> connectionFeedback [
 	^ OPInteractiveLine new
 		lineBuilder:
-				[ :fromFigure :toFigure | self createEdgeFrom: fromFigure to: toFigure ];
+				[ :fromFigure :toFigure | self createLineFrom: fromFigure to: toFigure ];
 		from: source figure
 ]
 
 { #category : #hooks }
-OPDirectionalRelationshipController >> createEdgeFrom: fromElement to: toElement [
+OPDirectionalRelationshipController >> createLineFrom: fromElement to: toElement [
 	^ self subclassResponsibility
 ]
 

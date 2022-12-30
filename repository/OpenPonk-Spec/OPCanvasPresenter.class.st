@@ -5,11 +5,8 @@ Class {
 	#name : #OPCanvasPresenter,
 	#superclass : #SpRoassalPresenter,
 	#instVars : [
-		'roassalCanvas',
 		'diagramController',
-		'lastClickPosition',
-		'onZoomChange',
-		'lastSelectedFigure'
+		'onZoomChange'
 	],
 	#category : #'OpenPonk-Spec-Windows'
 }
@@ -20,9 +17,7 @@ OPCanvasPresenter >> addMenuFor: aFigure [
 		when: TRMouseRightClick
 		do: [ :event | 
 			| menu |
-			self lastClickPosition: event position.
 			self diagramController selectFigure: event element.
-			self lastSelectedFigure: event element.
 			menu := CmdContextMenuActivation
 				buildContextMenuFor: self
 				inContext: (OPDiagramFigureContext for: self of: self selectedElements).
@@ -31,33 +26,23 @@ OPCanvasPresenter >> addMenuFor: aFigure [
 
 { #category : #adding }
 OPCanvasPresenter >> addMouseEventsFor: aFigure [
+
 	aFigure
 		when: TRMouseDoubleLeftClick
 		do: [ :event | 
-			self lastClickPosition: event position.
-			self diagramController doubleClickFigure: event element ].
+		self diagramController doubleClickFigure: event element ].
 	aFigure
 		when: TRMouseLeftClick
-		do: [ :event | 
-			self lastClickPosition: event position.
-			self diagramController selectFigure: event element.
-			self lastSelectedFigure: event element ].
+		do: [ :event | self diagramController selectFigure: event element ].
 	aFigure
 		when: TRMouseRightClick
-		do: [ :event | 
-			self lastClickPosition: event position.
-			self diagramController selectFigure: event element.
-			self lastSelectedFigure: event element ].
+		do: [ :event | self diagramController selectFigure: event element ].
 	aFigure
 		when: TRMouseEnter
-		do: [ :event | 
-			self lastClickPosition: event position.
-			self diagramController hoverFigure: event element ].
+		do: [ :event | self diagramController hoverFigure: event element ].
 	aFigure
 		when: TRMouseLeave
-		do: [ :event | 
-			self lastClickPosition: event position.
-			self diagramController hoverCanvas ]
+		do: [ :event | self diagramController hoverCanvas ]
 ]
 
 { #category : #accessing }
@@ -65,12 +50,13 @@ OPCanvasPresenter >> attachController: aDiagramController [
 
 	(diagramController := aDiagramController)
 		canvas: self canvas;
-		whenFigureAdded: [ :figure | self figureAdded: figure ];
-		whenAllDeselectedDo: [ self lastSelectedFigure: nil ]
+		whenFigureAdded: [ :figure | self figureAdded: figure ]
 ]
 
 { #category : #'selection handling' }
 OPCanvasPresenter >> canvasClicked: anEvent [
+
+	self deprecated: 'Last click is now handled by OPRSEventLogger'.
 	self lastClickPosition: anEvent position.
 	self diagramController selectCanvas
 ]
@@ -86,7 +72,7 @@ OPCanvasPresenter >> canvasContextClicked: anEvent [
 { #category : #private }
 OPCanvasPresenter >> cleanCanvas [
 
-	self canvas shapes copy do: #remove.
+	self canvas shapes copy do: #remove
 ]
 
 { #category : #private }
@@ -292,9 +278,10 @@ OPCanvasPresenter >> exportCanvasToSvg: aFileReference silently: aSilentlyBoolea
 
 { #category : #adding }
 OPCanvasPresenter >> figureAdded: aFigure [
+
 	"Only elements can be translated, not edges."
-	(aFigure isElement)
-		ifTrue: [ aFigure translateTo: self lastClickPosition ].
+
+	aFigure isNode ifTrue: [ aFigure translateTo: self lastClickPosition ].
 	self addMouseEventsFor: aFigure.
 	self addMenuFor: aFigure.
 	self signalUpdate
@@ -337,15 +324,21 @@ OPCanvasPresenter >> initialize [
 { #category : #initialization }
 OPCanvasPresenter >> initializeCanvas: aCanvas [
 
-	aCanvas
-		when: RSMouseLeftClick
-		do: [ :event | self canvasClicked: event ].
+	| canvasController |
 	aCanvas
 		when: RSMouseRightClick
 		do: [ :event | self canvasContextClicked: event ].
-	aCanvas @ (OPRSElasticBoxInteraction withCandidatesBlock: [ 
-		 diagramController selectableFigures ]).
-	aCanvas @ RSZoomableCanvasInteraction.
+	canvasController := RSCanvasController new.
+	canvasController interactionsFromArray: { 
+			RSDraggableCanvasInteraction new.
+			RSKeyNavigationCanvasInteraction new.
+			RSZoomableCanvasInteraction new.
+			RSScrollBarsCanvasInteraction new }.
+	aCanvas @ canvasController @ OPRSSelectableCanvas
+	@ OPRSEventLogger.
+	(aCanvas propertyAt: OPRSSelectableCanvas)
+		when: RSSelectionEndEvent
+		do: [ :evt | self selectedShapes: evt selectedShapes ].
 	self flag: #TODO_R3.
 	"aCanvas @ (RTGridView new gridSize: 20)."
 	^ aCanvas when: RSScaleChangedEvent do: [ :event | 
@@ -361,22 +354,15 @@ OPCanvasPresenter >> initializeCanvas: aCanvas [
 
 { #category : #events }
 OPCanvasPresenter >> lastClickPosition [
-	^ lastClickPosition ifNil: [ 0 @ 0 ]
+
+	^ ((self currentCanvas propertyAt: OPRSEventLogger) lastOf:
+		   RSSelectionEndEvent) ifNil: [ 0 @ 0 ]
 ]
 
 { #category : #events }
 OPCanvasPresenter >> lastClickPosition: aPoint [
-	lastClickPosition := aPoint
-]
 
-{ #category : #accessing }
-OPCanvasPresenter >> lastSelectedFigure [
-	^ lastSelectedFigure
-]
-
-{ #category : #accessing }
-OPCanvasPresenter >> lastSelectedFigure: aFigure [
-	lastSelectedFigure := aFigure
+	self deprecated: 'Last click is now handled by OPRSEventLogger'
 ]
 
 { #category : #private }
@@ -417,12 +403,12 @@ OPCanvasPresenter >> roassalView [
 { #category : #accessing }
 OPCanvasPresenter >> selectedElements [
 
-	self canvas
-		propertyAt: OPRSElasticBoxInteraction
-		ifPresent: [ :els | els ifNotEmpty: [ ^ els ] ].
-	^ self lastSelectedFigure
-		  ifNil: [ {  } ]
-		  ifNotNil: [ { self lastSelectedFigure } ]
+	^ (self canvas propertyAt: OPRSSelectableCanvas) selectedShapes
+]
+
+{ #category : #'selection handling' }
+OPCanvasPresenter >> selectedShapes: shapes [
+	self diagramController selectedShapes: shapes
 ]
 
 { #category : #'as yet unclassified' }

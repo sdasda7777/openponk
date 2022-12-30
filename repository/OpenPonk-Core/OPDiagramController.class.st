@@ -32,7 +32,8 @@ OPDiagramController >> addAllElements [
 	self
 		deprecated: 'Use #showAllElements instead.'
 		transformWith:
-		'`@receiver addAllElements' -> '`@receiver showAllElements'
+		'`@receiver addAllElements' -> '`@receiver showAllElements'.
+	^ self showAllElements
 ]
 
 { #category : #adding }
@@ -84,7 +85,7 @@ OPDiagramController >> addedFigureFor: aController [
 		ifTrue: [ figuresBeingAdded remove: aController ].
 	figure := aController figure.
 	figureAdded value: figure.
-	figuresBeingAdded ifEmpty: [ self updateView ].
+	figuresBeingAdded ifEmpty: [ self updateCanvas ].
 	^ figure
 ]
 
@@ -205,10 +206,7 @@ OPDiagramController >> canvas: aCanvas [
 { #category : #rebuilding }
 OPDiagramController >> cleanCanvas [
 
-	self flag: #TODO_R3.
-	self canvas shapes copy do: [ :each | 
-		(each isKindOf: TRCanvasGridShape) ifFalse: [ each remove ] ].
-	self canvas fixedShapes copy do: #remove
+	self editor canvasPresenter cleanCanvas
 ]
 
 { #category : #rebuilding }
@@ -360,7 +358,7 @@ OPDiagramController >> figureAdded: aFigure [
 		transformWith: '`@receiver figureAdded: `@statements1'
 			->
 			'`@receiver addedFigureFor: (`@receiver controllerForFigure: `@statements1)'.
-	self addedFigureFor: (self controllerForFigure: aFigure)
+	^ self addedFigureFor: (self controllerForFigure: aFigure)
 ]
 
 { #category : #deprecated }
@@ -685,6 +683,13 @@ OPDiagramController >> selectFigure: aFigure [
 { #category : #figures }
 OPDiagramController >> selectableFigures [
 	^ #()
+]
+
+{ #category : #'protocol-canvas' }
+OPDiagramController >> selectedShapes: shapes [
+
+	self editor palette selectedTool selectedControllers:
+		(shapes collect: [ :each | self controllerForFigure: each ])
 ]
 
 { #category : #rebuilding }
