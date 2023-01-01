@@ -8,10 +8,7 @@ Class {
 		'announcer',
 		'controllers',
 		'editor',
-		'hoverHolder',
 		'figureAdded',
-		'selectionHolder',
-		'deselectionHolder',
 		'plugin',
 		'autosaveManager',
 		'figureToControllerCache',
@@ -75,6 +72,22 @@ OPDiagramController >> addModelElement: aModelElement [
 ]
 
 { #category : #accessing }
+OPDiagramController >> addMouseEventsFor: aFigure [
+
+	aFigure when: RSMouseRightClick do: [ :event | 
+		| menu |
+		menu := CmdContextMenuActivation
+			        buildContextMenuFor: self
+			        inContext:
+			        (OPDiagramFigureContext for: self of: self selectedElements).
+		menu popUpInWorld ].
+	aFigure
+		when: RSMouseEnter
+		do: [ :event | 
+		self diagramController hoverFigure: event shape ]
+]
+
+{ #category : #accessing }
 OPDiagramController >> addedFigureFor: aController [
 
 	| figure |
@@ -83,16 +96,26 @@ OPDiagramController >> addedFigureFor: aController [
 			self traceCr:
 				'DiagramController>>#addedFigureFor: added figure not previously marked as being added' ]
 		ifTrue: [ figuresBeingAdded remove: aController ].
+
 	figure := aController figure.
-	figureAdded value: figure.
+	self addMouseEventsFor: figure.
+
+	figure isNode ifTrue: [ 
+		figure translateTo:
+			(((self canvas propertyAt: OPRSEventLogger) lastOf:
+				  RSSelectionEndEvent) ifNil: [ 0 @ 0 ]) ].
+	self addMouseEventsFor: figure.
+	figure signalUpdate.
+
 	figuresBeingAdded ifEmpty: [ self updateCanvas ].
 	^ figure
 ]
 
 { #category : #accessing }
 OPDiagramController >> addingFigureFor: aController [
-	(figuresBeingAdded includes: aController)
-		ifTrue: [ self notify: 'Same controller is already being added' ].
+
+	(figuresBeingAdded includes: aController) ifTrue: [ 
+		self notify: 'Same controller is already being added' ].
 	figuresBeingAdded add: aController
 ]
 
@@ -200,7 +223,8 @@ OPDiagramController >> canvas [
 { #category : #accessing }
 OPDiagramController >> canvas: aCanvas [
 
-	canvas := aCanvas
+	canvas := aCanvas.
+	self addMouseEventsFor: self
 ]
 
 { #category : #rebuilding }
@@ -235,6 +259,8 @@ OPDiagramController >> controllerFactory [
 
 { #category : #'controllers management' }
 OPDiagramController >> controllerForFigure: aFigure [
+
+	aFigure = canvas ifTrue: [ ^ self ].
 	^ self cachedControllerForFigure: aFigure
 	"^ self controllers detect: [ :ctrl | ctrl figure = aFigure ]"
 ]
@@ -320,13 +346,6 @@ OPDiagramController >> diagramController: aController [
 { #category : #userinterface }
 OPDiagramController >> disableRefresh [
 	self flag: #todo
-]
-
-{ #category : #'protocol-canvas' }
-OPDiagramController >> doubleClickFigure: aFigure [
-	| controller |
-	controller := self controllerForFigure: aFigure.
-	controller figureDoubleClicked.
 ]
 
 { #category : #'ui interaction' }
@@ -420,15 +439,15 @@ OPDiagramController >> hideModelFromDiagram: aModel [
 ]
 
 { #category : #'protocol-canvas' }
-OPDiagramController >> hoverCanvas [
-	hoverHolder value: self
+OPDiagramController >> hoverController: aController [
+
+	self editor palette selectedTool hoveredController: aController
 ]
 
 { #category : #'protocol-canvas' }
 OPDiagramController >> hoverFigure: aFigure [
-	| controller |
-	controller := self controllerForFigure: aFigure.
-	hoverHolder value: controller
+
+	self hoverController: (self controllerForFigure: aFigure)
 ]
 
 { #category : #'ui interaction' }
@@ -441,9 +460,6 @@ OPDiagramController >> incompatiblePaletteItemNames [
 { #category : #initialization }
 OPDiagramController >> initialize [
 	super initialize.
-	selectionHolder := [  ].
-	deselectionHolder := [  ].
-	hoverHolder := [  ].
 	figureAdded := [ :figure |  ].
 	controllerFactory := self controllerFactory.
 	diagramController := self.
@@ -670,7 +686,9 @@ OPDiagramController >> selectCanvas [
 
 { #category : #'ui interaction' }
 OPDiagramController >> selectController: aController [
-	self editor palette selectSelectionTool selectedTool targetSelected: aController
+
+	self editor palette selectSelectionTool selectedTool 
+		selectedTargetControllers: { aController }
 ]
 
 { #category : #'protocol-canvas' }
@@ -683,6 +701,12 @@ OPDiagramController >> selectFigure: aFigure [
 { #category : #figures }
 OPDiagramController >> selectableFigures [
 	^ #()
+]
+
+{ #category : #accessing }
+OPDiagramController >> selectedElements [
+
+	^ (self canvas propertyAt: OPRSSelectableCanvas) selectedShapes
 ]
 
 { #category : #'protocol-canvas' }

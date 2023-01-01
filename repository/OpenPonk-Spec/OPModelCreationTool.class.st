@@ -8,10 +8,14 @@ Class {
 }
 
 { #category : #callbacks }
-OPModelCreationTool >> targetSelected: aController [
-	(aController canBeTargetFor: objectController)
-		ifFalse: [ ^ self ].
-	aController addAsTargetFor: objectController.
+OPModelCreationTool >> selectedControllers: aCollectionOfControllers [
+
+	| targetController |
+	aCollectionOfControllers size = 1 ifFalse: [ ^ self ].
+	targetController := aCollectionOfControllers anyOne.
+	(targetController canBeTargetFor: objectController) ifFalse: [ 
+		^ self ].
+	targetController addAsTargetFor: objectController.
 	self palette deselectTool.
 	objectController := nil
 ]

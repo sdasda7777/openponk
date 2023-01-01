@@ -37,8 +37,15 @@ OPPaletteTool >> editor [
 { #category : #protocol }
 OPPaletteTool >> enableMultiselect [
 
-	(self diagramController canvas propertyAt: OPRSSelectableCanvas)
-		enableMultiselect
+	self diagramController canvas
+		propertyAt: OPRSSelectableCanvas
+		ifPresent: [ :selectableCanvas | selectableCanvas enableMultiselect ]
+]
+
+{ #category : #'as yet unclassified' }
+OPPaletteTool >> hoveredController: aController [
+
+	"do nothing by default"
 ]
 
 { #category : #accessing }

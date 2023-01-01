@@ -70,12 +70,13 @@ OPRSSelectableCanvas >> onShape: aCanvas [
 	aCanvas propertyAt: self class put: self.
 	aCanvas
 		when: RSMouseLeftClick
-		do: [ :evt | self selectShapes: RSGroup new byEvent: evt ]
+		do: [ :evt | self selectShapes: { aCanvas } byEvent: evt ]
 ]
 
 { #category : #hooks }
 OPRSSelectableCanvas >> selectShapes: aGroup byEvent: anEvent [
 
+	self halt.
 	(multiselectEnabled not and: [ aGroup size > 1 ]) ifTrue: [ ^ self ].
 	selectedShapes := aGroup.
 	{ 

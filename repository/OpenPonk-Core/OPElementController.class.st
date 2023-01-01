@@ -140,11 +140,6 @@ OPElementController >> renderFigureIn: aCanvas [
 	^ self subclassResponsibility
 ]
 
-{ #category : #'ui interaction' }
-OPElementController >> reselect [
-	self diagramController ifNotNil: [ self diagramController selectController: self ]
-]
-
 { #category : #construction }
 OPElementController >> showInDiagram: aDiagramController [
 	aDiagramController addController: self.

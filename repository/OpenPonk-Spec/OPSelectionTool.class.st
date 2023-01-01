@@ -14,34 +14,36 @@ Class {
 { #category : #protocol }
 OPSelectionTool >> deselect [
 
-	(self diagramController canvas propertyAt: OPRSSelectableCanvas)
-		disableMultiselect.
-	self selectedControllers: { }
+	self disableMultiselect.
+	self selectedControllers: {  }
 ]
 
 { #category : #accessing }
 OPSelectionTool >> palette: aPalette [
 
 	palette ifNotNil: [ 
-		self diagramController ifNotNil: [ 
-			self diagramController announcer unsubscribe: self ] ].
+		self diagramController ifNotNil: [ :diagramController | 
+			diagramController announcer unsubscribe: self ] ].
 	super palette: aPalette
 ]
 
 { #category : #protocol }
 OPSelectionTool >> select [
 
+	self enableMultiselect.
 	selectedControllers := {  }
 ]
 
 { #category : #protocol }
 OPSelectionTool >> selectedControllers: aCollectionOfControllers [
 
-	selectedControllers , aCollectionOfControllers
+	| originalFigures newFigures |
+	originalFigures := selectedControllers collect: #figure.
+	newFigures := aCollectionOfControllers collect: #figure.
+	originalFigures , newFigures
 		detect: [ :any | any hasProperty: OPRSSelectable ]
-		ifFound: [ :ctrl | 
-			(ctrl propertyAt: OPRSSelectable) doHighlightShapes:
-				(aCollectionOfControllers collect: #figure) ].
+		ifFound: [ :fig | 
+			(fig propertyAt: OPRSSelectable) doHighlightShapes: newFigures ].
 	selectedControllers := aCollectionOfControllers.
 	self editor openFormOn: (aCollectionOfControllers size = 1
 			 ifTrue: [ aCollectionOfControllers anyOne ]

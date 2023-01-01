@@ -366,17 +366,17 @@ OPProjectController >> saveState: saveData to: aFile [
 
 { #category : #'diagram selecting' }
 OPProjectController >> selectInDiagram: aModelElement [
-	controllers
-		do: [ :dctrl | 
-			dctrl controllers
-				do: [ :ctrl | 
-					ctrl model = aModelElement
-						ifTrue: [ | palette |
-							palette := dctrl editor palette.
-							palette selectSelectionTool selectedTool targetSelected: ctrl.
-							dctrl editor canvasPresenter roassalView canvas camera
-								translateTo: ctrl figure position.
-							^ self ] ] ]
+
+	controllers do: [ :dctrl | 
+		dctrl controllers do: [ :ctrl | 
+			ctrl model = aModelElement ifTrue: [ 
+				| palette |
+				palette := dctrl editor palette.
+				palette selectSelectionTool selectedTool 
+					selectedTargetControllers: { ctrl }.
+				dctrl editor canvasPresenter roassalView canvas camera 
+					translateTo: ctrl figure position.
+				^ self ] ] ]
 ]
 
 { #category : #opening }

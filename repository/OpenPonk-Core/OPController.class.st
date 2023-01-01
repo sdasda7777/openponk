@@ -117,11 +117,6 @@ OPController >> figure [
 	^ self subclassResponsibility
 ]
 
-{ #category : #figures }
-OPController >> figureDoubleClicked [
-	"do nothing by default"
-]
-
 { #category : #'canvas actions' }
 OPController >> hideSelectionFeedback [
 	"by default do nothing"
@@ -188,7 +183,11 @@ OPController >> nameOfType [
 
 { #category : #figures }
 OPController >> refreshFigure [
-	self figure trachelShape triggerCallbacksForStep: 0 @ 0.
+
+	self figure announce: (RSPositionChangedEvent new
+			 shape: self figure;
+			 oldPosition: self figure position;
+			 newPosition: self figure position).
 	self figure signalUpdate.
 	^ self figure
 ]
@@ -231,7 +230,7 @@ OPController >> removeDependentControllers [
 OPController >> removeFigure [
 
 	self diagramController deselectAll.
-	self figure canvas ifNotNil: [ self figure remove ]
+	self figure remove
 ]
 
 { #category : #destruction }

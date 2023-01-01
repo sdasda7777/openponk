@@ -11,46 +11,10 @@ Class {
 	#category : #'OpenPonk-Spec-Windows'
 }
 
-{ #category : #adding }
-OPCanvasPresenter >> addMenuFor: aFigure [
-	aFigure
-		when: TRMouseRightClick
-		do: [ :event | 
-			| menu |
-			self diagramController selectFigure: event element.
-			menu := CmdContextMenuActivation
-				buildContextMenuFor: self
-				inContext: (OPDiagramFigureContext for: self of: self selectedElements).
-			menu popUpInWorld ]
-]
-
-{ #category : #adding }
-OPCanvasPresenter >> addMouseEventsFor: aFigure [
-
-	aFigure
-		when: TRMouseDoubleLeftClick
-		do: [ :event | 
-		self diagramController doubleClickFigure: event element ].
-	aFigure
-		when: TRMouseLeftClick
-		do: [ :event | self diagramController selectFigure: event element ].
-	aFigure
-		when: TRMouseRightClick
-		do: [ :event | self diagramController selectFigure: event element ].
-	aFigure
-		when: TRMouseEnter
-		do: [ :event | self diagramController hoverFigure: event element ].
-	aFigure
-		when: TRMouseLeave
-		do: [ :event | self diagramController hoverCanvas ]
-]
-
 { #category : #accessing }
 OPCanvasPresenter >> attachController: aDiagramController [
 
-	(diagramController := aDiagramController)
-		canvas: self canvas;
-		whenFigureAdded: [ :figure | self figureAdded: figure ]
+	(diagramController := aDiagramController) canvas: self canvas
 ]
 
 { #category : #'selection handling' }
@@ -276,17 +240,6 @@ OPCanvasPresenter >> exportCanvasToSvg: aFileReference silently: aSilentlyBoolea
 		actionOnClick: [ aFileReference openInOSFileBrowser ]
 ]
 
-{ #category : #adding }
-OPCanvasPresenter >> figureAdded: aFigure [
-
-	"Only elements can be translated, not edges."
-
-	aFigure isNode ifTrue: [ aFigure translateTo: self lastClickPosition ].
-	self addMouseEventsFor: aFigure.
-	self addMenuFor: aFigure.
-	self signalUpdate
-]
-
 { #category : #toolbar }
 OPCanvasPresenter >> ifFileNameNotCompatible: aFileReference do: aBlock [
 
@@ -330,26 +283,23 @@ OPCanvasPresenter >> initializeCanvas: aCanvas [
 		do: [ :event | self canvasContextClicked: event ].
 	canvasController := RSCanvasController new.
 	canvasController interactionsFromArray: { 
-			RSDraggableCanvasInteraction new.
 			RSKeyNavigationCanvasInteraction new.
 			RSZoomableCanvasInteraction new.
 			RSScrollBarsCanvasInteraction new }.
-	aCanvas @ canvasController @ OPRSSelectableCanvas
-	@ OPRSEventLogger.
+	aCanvas @ canvasController @ OPRSSelectableCanvas new rightLeft @ OPRSEventLogger.
 	(aCanvas propertyAt: OPRSSelectableCanvas)
 		when: RSSelectionEndEvent
 		do: [ :evt | self selectedShapes: evt selectedShapes ].
 	self flag: #TODO_R3.
 	"aCanvas @ (RTGridView new gridSize: 20)."
 	^ aCanvas when: RSScaleChangedEvent do: [ :event | 
-		  onZoomChange value: (event newScale < 1
-				   ifTrue: [ '   ' ]
-				   ifFalse: [ '' ]) , (event newScale * 100) rounded asString
-			  , '%'.
-		  self editor zoomLabel label: (event newScale < 1
-				   ifTrue: [ '   ' ]
-				   ifFalse: [ '' ]) , (event newScale * 100) rounded asString
-			  , '%' ]
+		  | zoomText |
+		  zoomText := (event newScale < 1
+			               ifTrue: [ '   ' ]
+			               ifFalse: [ '' ])
+		              , (event newScale * 100) rounded asString , '%'.
+		  onZoomChange value: zoomText.
+		  self editor zoomLabel label: ' ' , zoomText ]
 ]
 
 { #category : #events }
@@ -403,7 +353,7 @@ OPCanvasPresenter >> roassalView [
 { #category : #accessing }
 OPCanvasPresenter >> selectedElements [
 
-	^ (self canvas propertyAt: OPRSSelectableCanvas) selectedShapes
+	^ self diagramController selectedElements
 ]
 
 { #category : #'selection handling' }

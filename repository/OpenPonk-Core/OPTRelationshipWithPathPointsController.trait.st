@@ -6,7 +6,7 @@ Trait {
 { #category : #accessing }
 OPTRelationshipWithPathPointsController >> layout [
 	self figure shape ifNil: [ ^ OPElementLayout none ].
-	(self figure shape isKindOf: OPRTConnection)
+	(self figure shape isKindOf: RSAbstractControlPointsLine)
 		ifFalse: [ ^ OPElementLayout none ].
 	^ (self figure shape pathFor: self figure)
 		ifNil: [ OPElementLayout none ]

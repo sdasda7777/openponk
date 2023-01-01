@@ -226,8 +226,8 @@ OPEditor >> openEmptyModel: aModel [
 	diagramController := self newDiagramControllerFor: aModel.
 	self workbench projectController addDiagramController:
 		diagramController.
-	self rebuildWidget.
-	canvasPresenter attachController: diagramController
+	canvasPresenter attachController: diagramController.
+	self rebuildWidget
 ]
 
 { #category : #'as yet unclassified' }
