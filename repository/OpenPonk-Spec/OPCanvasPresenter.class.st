@@ -52,7 +52,6 @@ OPCanvasPresenter >> createCommandContextForSelection: selectedItems [
 	"simple context has no information about selected items"
 
 	^ OPDiagramFigureContext for: self of: selectedItems
-	"	^CmdContactBookPresenterContext for: self of: selectedContacts"
 ]
 
 { #category : #accessing }
@@ -273,9 +272,9 @@ OPCanvasPresenter >> initializeCanvas: aCanvas [
 	aCanvas
 		when: RSMouseRightClick
 		do: [ :event | self canvasContextClicked: event ].
-	"aCanvas @ RSKeyNavigationCanvasInteraction.
+	aCanvas @ RSKeyNavigationCanvasInteraction.
 	aCanvas @ RSZoomableCanvasInteraction.
-	aCanvas @ RSScrollBarsCanvasInteraction."
+	aCanvas @ RSScrollBarsCanvasInteraction.
 	aCanvas @ (OPRSSelectableCanvas new
 		 rightLeft;
 		 yourself).
