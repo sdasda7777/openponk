@@ -277,7 +277,7 @@ OPCanvasPresenter >> initialize [
 { #category : #initialization }
 OPCanvasPresenter >> initializeCanvas: aCanvas [
 
-	| canvasController |
+	| canvasController labelMousePos labelMousePosCam labelScale labelCamPos s1 s2 labelLastClick |
 	aCanvas
 		when: RSMouseRightClick
 		do: [ :event | self canvasContextClicked: event ].
@@ -286,10 +286,65 @@ OPCanvasPresenter >> initializeCanvas: aCanvas [
 			RSKeyNavigationCanvasInteraction new.
 			RSZoomableCanvasInteraction new.
 			RSScrollBarsCanvasInteraction new }.
-	aCanvas @ canvasController @ OPRSSelectableCanvas new rightLeft @ OPRSEventLogger.
+	aCanvas @ canvasController.
+	aCanvas @ (OPRSSelectableCanvas new
+		 rightLeft;
+		 yourself).
+	aCanvas @ OPRSEventLogger.
 	(aCanvas propertyAt: OPRSSelectableCanvas)
 		when: RSSelectionEndEvent
 		do: [ :evt | self selectedShapes: evt selectedShapes ].
+
+	labelMousePos := RSLabel new
+		                 isFixed: true;
+		                 translateTo: 400 @ 10;
+		                 yourself.
+	labelMousePosCam := RSLabel new
+		                    isFixed: true;
+		                    translateTo: 400 @ 30;
+		                    yourself.
+	labelScale := RSLabel new
+		              isFixed: true;
+		              translateTo: 400 @ 50;
+		              yourself.
+	labelCamPos := RSLabel new
+		               isFixed: true;
+		               translateTo: 400 @ 70;
+		               yourself.
+	labelLastClick := RSLabel new
+		                  isFixed: true;
+		                  translateTo: 400 @ 90;
+		                  yourself.
+	s1 := RSBox new
+		      color: Color green;
+		      translateTo: 200 @ 200;
+		      yourself.
+	s2 := RSBox new
+		      color: Color red;
+		      translateTo: -200 @ -200;
+		      yourself.
+	aCanvas
+		add: s1;
+		add: s2;
+		add: labelMousePos;
+		add: labelMousePosCam;
+		add: labelScale;
+		add: labelCamPos;
+		add: labelLastClick.
+	aCanvas when: RSMouseMove do: [ :e | 
+		labelMousePos text: 'mouse pos: ' , e position asString.
+		labelMousePosCam text:
+			'mouse posFromCam: ' , e positionFromCamera asString.
+		labelScale text: 'scale: ' , aCanvas camera scale asString.
+		labelCamPos text: 'cam position: ' , aCanvas position asString.
+		labelLastClick text: 'last click: '
+			,
+				(((self canvas propertyAt: OPRSEventLogger) lastOf:
+					  RSMouseLeftClick)
+					 ifNil: [ 0 @ 0 ]
+					 ifNotNil: [ :lastClick | lastClick position ]) asString.
+		aCanvas signalUpdate ].
+
 	self flag: #TODO_R3.
 	"aCanvas @ (RTGridView new gridSize: 20)."
 	^ aCanvas when: RSScaleChangedEvent do: [ :event | 
@@ -300,13 +355,6 @@ OPCanvasPresenter >> initializeCanvas: aCanvas [
 		              , (event newScale * 100) rounded asString , '%'.
 		  onZoomChange value: zoomText.
 		  self editor zoomLabel label: ' ' , zoomText ]
-]
-
-{ #category : #events }
-OPCanvasPresenter >> lastClickPosition [
-
-	^ ((self currentCanvas propertyAt: OPRSEventLogger) lastOf:
-		   RSSelectionEndEvent) ifNil: [ 0 @ 0 ]
 ]
 
 { #category : #events }
@@ -364,9 +412,9 @@ OPCanvasPresenter >> selectedShapes: shapes [
 { #category : #'as yet unclassified' }
 OPCanvasPresenter >> showAllFigures [
 
-	self canvas elements
+	self canvas nodes
 		ifEmpty: [ self canvas camera scale: 1 ]
-		ifNotEmpty: [ self canvas focusOnCenterScaled ]
+		ifNotEmpty: [ self canvas zoomToFit ]
 ]
 
 { #category : #signalling }

@@ -4,6 +4,26 @@ Class {
 	#category : #'OpenPonk-Roassal3'
 }
 
+{ #category : #announcer }
+OPRSSelectable >> announceHighlight: shape source: shapeOrCanvas [
+
+	(shape propertyAt: self class ifAbsent: [ ^ self ]) announce: [ 
+		RSHighlightEvent new
+			interaction: self;
+			shape: shape;
+			source: shapeOrCanvas ]
+]
+
+{ #category : #announcer }
+OPRSSelectable >> announceUnHightlight: shape source: shapeOrCanvas [
+
+	(shape propertyAt: self class ifAbsent: [ ^ self ]) announce: [ 
+		RSUnHighlightEvent new
+			interaction: self;
+			shape: shape;
+			source: shapeOrCanvas ]
+]
+
 { #category : #'as yet unclassified' }
 OPRSSelectable >> highlightBorderColor: aColor [
 
@@ -34,4 +54,10 @@ OPRSSelectable >> onShape: aShape [
 			ifAbsent: [ 
 				self error:
 					'OPRSSelectable requires OPRSSelectableCanvas on canvas' ] ]
+]
+
+{ #category : #accessing }
+OPRSSelectable >> propertyKey [
+
+	^ propertyKey ifNil: [ propertyKey := #selected_shapes ]
 ]

@@ -1,6 +1,13 @@
 Extension { #name : #RSShape }
 
 { #category : #'*OpenPonk-Roassal3' }
+RSShape >> asEmptyMarker [
+
+	self color: Color white.
+	^ OPRSEmptyMarker new shape: self
+]
+
+{ #category : #'*OpenPonk-Roassal3' }
 RSShape >> isElement [
 
 	self

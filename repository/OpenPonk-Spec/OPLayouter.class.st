@@ -95,14 +95,13 @@ OPLayouter >> diagramController: aDiagramController [
 
 { #category : #layouts }
 OPLayouter >> dominanceTreeLayout [
-	self
-		applyLayout: [ :boxes :links | 
-			RTDominanceTreeLayout new
-				verticallyReverse;
-				verticalGap: 100;
-				horizontalGap: 100;
-				doNotAttachPoint;
-				on: boxes edges: links ]
+
+	self applyLayout: [ :boxes :links | 
+		RSDominanceTreeLayout new
+			verticallyReverse;
+			verticalGap: 100;
+			horizontalGap: 100;
+			on: boxes edges: links ]
 ]
 
 { #category : #accessing }
@@ -165,7 +164,9 @@ OPLayouter >> updateCanvas [
 	| canvas |
 	canvas := diagramController canvas.
 	canvas signalUpdate.
-	canvas shapes ifNotEmpty: [ canvas camera zoomToFit ]
+	canvas nodes
+		ifEmpty: [ canvas camera scale: 1 ]
+		ifNotEmpty: [ canvas zoomToFit ]
 ]
 
 { #category : #userinterface }

@@ -15,22 +15,21 @@ Class {
 { #category : #building }
 OPRSAnchorConstraint >> addAnchorAndGuideLine [
 
+	self anchorShape isInACanvas ifTrue: [ ^ self ].
+	shape canvas add: self anchorShape.
+	self guideLine from: shape to: self anchorShape.
+	shape canvas add: self guideLine
+]
+
+{ #category : #building }
+OPRSAnchorConstraint >> anchorShape [
+
+	anchorShape ifNotNil: [ ^ anchorShape ].
 	anchorShape := RSBox new.
 	anchorShape
 		size: 0;
 		color: Color red.
-	shape canvas add: anchorShape.
-	guideLine := RSLine new.
-	guideLine
-		color: Color transparent;
-		from: shape to: anchorShape.
-	shape canvas add: guideLine.
-	line when: RSShapeRemovedEvent do: [ self remove ]
-]
-
-{ #category : #building }
-OPRSAnchorConstraint >> anchorSegment [
-	^ self segments segmentWithPointFor: self balance
+	^ anchorShape
 ]
 
 { #category : #accessing }
@@ -46,49 +45,32 @@ OPRSAnchorConstraint >> balance: aNumber [
 { #category : #building }
 OPRSAnchorConstraint >> build [
 
-	self addAnchorAndGuideLine.
+	line when: RSShapeRemovedEvent do: [ self remove ].
 	line from when: RSPositionChangedEvent do: [ self update ].
 	line to when: RSPositionChangedEvent do: [ self update ].
-	shape when: RSMouseLeftDragStart do: [ guideLine color: Color gray ].
-	shape when: RSMouseDragEnd do: [ guideLine color: Color transparent ]
-]
-
-{ #category : #'as yet unclassified' }
-OPRSAnchorConstraint >> computeExtraDistance [
-
-	"Compute the extra distance required to move the element to not overlap the segment."
-
-	| segment sideOfElement normals |
-	segment := self anchorSegment first.
-	sideOfElement := segment sideOfPoint: shape position.
-	normals := shape encompassingRectangle corners
-		           select: [ :each | 
-		           (segment sideOfPoint: each) ~= sideOfElement ]
-		           thenCollect: [ :each | 
-			           each distanceTo:
-				           (each
-					            nearestPointAlongLineFrom: segment from
-					            to: segment to) ].
-	normals ifEmpty: [ ^ 0 ].
-	^ minDistance sign > 0
-		  ifTrue: [ normals max ]
-		  ifFalse: [ normals max negated ]
-]
-
-{ #category : #'as yet unclassified' }
-OPRSAnchorConstraint >> connectionSegmentsFor: anEdge [
-	^ (anEdge shape pathFor: anEdge)
-		overlappingPairsCollect: [ :from :to | RTLineSegment from: from to: to ]
+	shape when: RSMouseLeftDragStart do: [ self addAnchorAndGuideLine ].
+	shape when: RSMouseDragEnd do: [ self removeAnchorAndGuideLine ]
 ]
 
 { #category : #accessing }
-OPRSAnchorConstraint >> element [
-	^ shape
+OPRSAnchorConstraint >> createUpdater [
+
+	^ OPRSAnchorConstraintUpdater new
+		  line: line;
+		  shape: shape;
+		  anchorShape: anchorShape;
+		  balance: balance;
+		  minDistance: minDistance;
+		  yourself
 ]
 
-{ #category : #accessing }
-OPRSAnchorConstraint >> element: anElement [
-	shape := anElement
+{ #category : #building }
+OPRSAnchorConstraint >> guideLine [
+
+	guideLine ifNotNil: [ ^ guideLine ].
+	guideLine := RSLine new.
+	self useGuideLine.
+	^ guideLine
 ]
 
 { #category : #accessing }
@@ -96,14 +78,11 @@ OPRSAnchorConstraint >> line [
 	^ line
 ]
 
-{ #category : #accessing }
-OPRSAnchorConstraint >> line: aLine [
-	line := aLine
-]
+{ #category : #building }
+OPRSAnchorConstraint >> lineLength [
 
-{ #category : #'as yet unclassified' }
-OPRSAnchorConstraint >> lineSegmentFor: anEdge [
-	^ anEdge lineSegments first
+	^ self segments sumNumbers: [ :pair | 
+		  pair first distanceTo: pair second ]
 ]
 
 { #category : #accessing }
@@ -117,74 +96,48 @@ OPRSAnchorConstraint >> minDistance: anInteger [
 ]
 
 { #category : #'as yet unclassified' }
-OPRSAnchorConstraint >> moveAnchor [
-	anchorShape translateTo: self anchorSegment last
-]
+OPRSAnchorConstraint >> noGuideLine [
 
-{ #category : #'as yet unclassified' }
-OPRSAnchorConstraint >> moveAwayFrom: aRectangle via: aVector [
-
-	"There should be minDistance between the start and the element. Move it in the direction fo the current segment"
-
-	| vector corners segment |
-	"source and target of the edge on top of each other... ignore"
-	aVector r = 0 ifTrue: [ ^ self ].
-	vector := aVector normalized
-	          * (aRectangle origin distanceTo: aRectangle corner).
-	corners := shape encompassingRectangle corners select: [ :each | 
-		           aRectangle containsPoint: each ].
-	segment := (corners collect: [ :each | 
-		            | sg |
-		            sg := RTLineSegment from: each to: each + vector.
-		            RTLineSegment
-			            from: each
-			            to: (sg intersectRectangle: aRectangle) anyOne ]) 
-		           detectMax: #length.
-	segment ifNotNil: [ shape translateBy: segment vector ]
-]
-
-{ #category : #'as yet unclassified' }
-OPRSAnchorConstraint >> moveAwayFromSegment: aSegment [
-	(aSegment intersectRectangle: shape encompassingRectangle)
-		ifNotEmpty:
-			[ :crossings | 
-			shape
-				translateBy:
-					aSegment vector normal
-						* (minDistance + self computeExtraDistance) negated ]
-]
-
-{ #category : #'as yet unclassified' }
-OPRSAnchorConstraint >> moveElement [
-	| segment from to |
-	segment := self anchorSegment first.
-	shape
-		translateTo: anchorShape position + (segment vector normal * minDistance negated).
-	self moveAwayFromSegment: segment.
-	from := line from encompassingRectangle expandBy: minDistance abs.
-	to := line to encompassingRectangle expandBy: minDistance abs.
-	balance > 0 & (shape encompassingRectangle intersects: from)
-		ifTrue: [ self moveAwayFrom: from via: segment vector ].
-	balance < 0 & (shape encompassingRectangle intersects: to)
-		ifTrue: [ self moveAwayFrom: to via: segment vector negated ]
+	self guideLine color: Color transparent
 ]
 
 { #category : #building }
 OPRSAnchorConstraint >> remove [
 
-	shape remove.
-	anchorShape remove.
-	guideLine remove
+	shape announcer unsubscribe: self.
+	line from announcer unsubscribe: self.
+	line to announcer unsubscribe: self.
+	self removeAnchorAndGuideLine
+]
+
+{ #category : #building }
+OPRSAnchorConstraint >> removeAnchorAndGuideLine [
+
+	anchorShape ifNotNil: [ anchorShape remove ].
+	guideLine ifNotNil: [ guideLine remove ]
 ]
 
 { #category : #accessing }
-OPRSAnchorConstraint >> segments [
+OPRSAnchorConstraint >> shape [
+	^ shape
+]
 
-	^ self connectionSegmentsFor: line
+{ #category : #building }
+OPRSAnchorConstraint >> stick: aShape on: aLine [
+
+	shape := aShape.
+	line := aLine.
+	self build
 ]
 
 { #category : #updating }
 OPRSAnchorConstraint >> update [
-	self moveAnchor.
-	self moveElement
+
+	self createUpdater update
+]
+
+{ #category : #'as yet unclassified' }
+OPRSAnchorConstraint >> useGuideLine [
+
+	self guideLine color: Color veryVeryLightGray
 ]

@@ -41,20 +41,18 @@ OPConnectionCreationTool >> hoveredController: aController [
 
 { #category : #callbacks }
 OPConnectionCreationTool >> hoveredSourceController: aController [
-	feedback
-		value:
-			((aController canBeSourceFor: connectionController)
-				ifTrue: [ aController showAcceptFeedbackFor: connectionController ]
-				ifFalse: [ aController showDenyFeedbackFor: connectionController ])
+
+	feedback value: ((aController canBeSourceFor: connectionController)
+			 ifTrue: [ aController showAcceptFeedbackFor: connectionController ]
+			 ifFalse: [ aController showDenyFeedbackFor: connectionController ])
 ]
 
 { #category : #callbacks }
 OPConnectionCreationTool >> hoveredTargetController: aController [
-	feedback
-		value:
-			((aController canBeTargetFor: connectionController)
-				ifTrue: [ aController showAcceptFeedbackFor: connectionController ]
-				ifFalse: [ aController showDenyFeedbackFor: connectionController ])
+
+	feedback value: ((aController canBeTargetFor: connectionController)
+			 ifTrue: [ aController showAcceptFeedbackFor: connectionController ]
+			 ifFalse: [ aController showDenyFeedbackFor: connectionController ])
 ]
 
 { #category : #'as yet unclassified' }
@@ -68,10 +66,11 @@ OPConnectionCreationTool >> initialize [
 { #category : #protocol }
 OPConnectionCreationTool >> select [
 
-	self halt.
 	feedback := nil asValueHolder.
 	feedback whenChangedDo: [ :newVal :oldVal | 
-		oldVal ifNotNil: [ oldVal remove ] ].
+		oldVal ifNotNil: [ 
+			(newVal isNil or: [ oldVal feedback ~= newVal feedback ]) ifTrue: [ 
+				oldVal remove ] ] ].
 	connectionController := factory value.
 	self selectSource
 ]
@@ -95,7 +94,6 @@ OPConnectionCreationTool >> selectTarget [
 { #category : #protocol }
 OPConnectionCreationTool >> selectedControllers: aCollectionOfControllers [
 
-	self halt.
 	^ selectionAction value: aCollectionOfControllers
 ]
 

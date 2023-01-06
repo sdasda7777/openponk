@@ -59,7 +59,8 @@ OPRSSelectableCanvas >> initialize [
 	super initialize.
 	selectedShapes := RSGroup new.
 	self
-		targetShapes: [:x | self halt ];
+		targetShapes: [ :canvas | 
+			canvas shapes select: [ :each | each hasProperty: OPRSSelectable ] ];
 		enableMultiselect
 ]
 
@@ -76,15 +77,12 @@ OPRSSelectableCanvas >> onShape: aCanvas [
 { #category : #hooks }
 OPRSSelectableCanvas >> selectShapes: aGroup byEvent: anEvent [
 
-	self halt.
 	(multiselectEnabled not and: [ aGroup size > 1 ]) ifTrue: [ ^ self ].
-	selectedShapes := aGroup.
-	{ 
-		RSSelectionStartEvent.
-		RSSelectionChangedEvent.
-		RSSelectionEndEvent }
-		collect: [ :each | 
-			(self createEvent: each with: anEvent) selectedShapes:
-				selectedShapes ]
-		thenDo: [ :each | self announce: each ]
+	super boxStarted: anEvent.
+	self announce:
+		((self createEvent: RSSelectionChangedEvent with: anEvent)
+			 oldSelectedShapes: selectedShapes;
+			 selectedShapes: (selectedShapes := aGroup);
+			 yourself).
+	super boxEnded: anEvent
 ]

@@ -15,7 +15,7 @@ Class {
 
 { #category : #hooks }
 OPDirectionalRelationshipController >> connectionFeedback [
-	^ OPInteractiveLine new
+	^ OPRSInteractiveLine new
 		lineBuilder:
 				[ :fromFigure :toFigure | self createLineFrom: fromFigure to: toFigure ];
 		from: source figure

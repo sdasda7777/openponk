@@ -262,14 +262,14 @@ OPController >> saveStateOnDragEndFor: aFigure [
 OPController >> showAcceptFeedbackFor: aController [
 	"Return something that understands #remove, or nil to not show any feedback."
 
-	^ OPAcceptDenyFeedbackBuilder acceptFeedbackFor: self figure
+	^ OPRSAcceptDenyFeedbackBuilder acceptFeedbackFor: self figure
 ]
 
 { #category : #'canvas actions' }
 OPController >> showDenyFeedbackFor: aController [
 	"Return something that understands #remove, or nil to not show any feedback."
 
-	^ OPAcceptDenyFeedbackBuilder denyFeedbackFor: self figure
+	^ OPRSAcceptDenyFeedbackBuilder denyFeedbackFor: self figure
 ]
 
 { #category : #construction }

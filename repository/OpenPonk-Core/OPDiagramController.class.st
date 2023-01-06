@@ -103,7 +103,9 @@ OPDiagramController >> addedFigureFor: aController [
 	figure isNode ifTrue: [ 
 		figure translateTo:
 			(((self canvas propertyAt: OPRSEventLogger) lastOf:
-				  RSSelectionEndEvent) ifNil: [ 0 @ 0 ]) ].
+				  RSMouseLeftClick)
+				 ifNil: [ 0 @ 0 ]
+				 ifNotNil: [ :lastClick | lastClick position ]) ].
 	self addMouseEventsFor: figure.
 	figure signalUpdate.
 
@@ -224,7 +226,7 @@ OPDiagramController >> canvas [
 OPDiagramController >> canvas: aCanvas [
 
 	canvas := aCanvas.
-	self addMouseEventsFor: self
+	self addMouseEventsFor: canvas
 ]
 
 { #category : #rebuilding }

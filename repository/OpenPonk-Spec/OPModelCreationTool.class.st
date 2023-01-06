@@ -11,6 +11,7 @@ Class {
 OPModelCreationTool >> selectedControllers: aCollectionOfControllers [
 
 	| targetController |
+	self halt.
 	aCollectionOfControllers size = 1 ifFalse: [ ^ self ].
 	targetController := aCollectionOfControllers anyOne.
 	(targetController canBeTargetFor: objectController) ifFalse: [ 
