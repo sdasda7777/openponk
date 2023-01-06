@@ -123,7 +123,7 @@ OPTestRelationControllerTest >> testRemoveFigureAndModel [
 	diagramController model entities add: model.
 	controller model: model.
 	controller showWithoutDependentInDiagram: diagramController.
-	diagramController removeFromView: controller figure.
+	diagramController removeFromCanvas: controller figure.
 	self assert: diagramController controllers asArray equals: {}.
 	self assert: diagramController model entities asArray equals: {}
 ]

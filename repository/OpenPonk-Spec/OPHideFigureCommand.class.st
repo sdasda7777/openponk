@@ -5,11 +5,6 @@ Class {
 }
 
 { #category : #testing }
-OPHideFigureCommand class >> canBeExecutedInModelContext: aToolContext [
-	^ aToolContext controller isHideable
-]
-
-{ #category : #testing }
 OPHideFigureCommand class >> canvasShortcutActivation [
 	<classAnnotation>
 	^ CmdShortcutActivation by: $h meta for: OPCanvasPresenter
@@ -17,5 +12,8 @@ OPHideFigureCommand class >> canvasShortcutActivation [
 
 { #category : #execution }
 OPHideFigureCommand >> basicExecute [
-	executor hideElements: models
+
+	controllers
+		select: #isHideable
+		thenDo: [ :each | executor hideElements: each model ]
 ]

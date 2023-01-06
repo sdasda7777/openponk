@@ -272,13 +272,6 @@ OPEditor >> setModelBeforeInitialization: aPlugin [
 	
 ]
 
-{ #category : #'diagram handling' }
-OPEditor >> showDiagram: aDiagram [
-
-	diagramController diagram: aDiagram.
-	diagramController rebuild
-]
-
 { #category : #updating }
 OPEditor >> tabDeleted [
 

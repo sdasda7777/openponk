@@ -70,7 +70,7 @@ OPLayouter >> basicApplyLayout: aTwoArgBlock [
 	isPartialLayout
 		ifTrue: [ 
 			nodes translateTo: oldEncompassingRectangle center.
-			diagramController view signalUpdate ]
+			diagramController canvas signalUpdate ]
 		ifFalse: [ self updateCanvas ]
 ]
 

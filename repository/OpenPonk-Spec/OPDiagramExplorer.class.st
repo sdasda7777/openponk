@@ -61,7 +61,7 @@ OPDiagramExplorer >> hideElements: elements [
 	diagramController deselectAll.
 	elements
 		do: [ :each | diagramController hideModelFromDiagram: each ].
-	diagramController view signalUpdate
+	diagramController canvas signalUpdate
 ]
 
 { #category : #initialization }

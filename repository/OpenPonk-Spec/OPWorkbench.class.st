@@ -177,7 +177,8 @@ OPWorkbench >> focusEditorOf: aDiagram [
 	aDiagram isSelected: true.
 	self announce: (OPEditorFocused on: focusedEditor).
 	topToolbar activeEditor: focusedEditor.
-	self currentWorld defer: [ focusedEditor showDiagram: aDiagram ]
+	focusedEditor diagramController diagram: aDiagram.
+	self currentWorld defer: [ focusedEditor diagramController rebuild ]
 ]
 
 { #category : #accessing }

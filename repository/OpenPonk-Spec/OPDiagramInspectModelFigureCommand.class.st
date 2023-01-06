@@ -18,7 +18,11 @@ OPDiagramInspectModelFigureCommand >> defaultMenuIcon [
 
 { #category : #execution }
 OPDiagramInspectModelFigureCommand >> defaultMenuItemName [
-	^ 'Inspect model'
+
+	| basicName |
+	basicName := 'Inspect model'.
+	models ifNil: [ ^ basicName ].
+	^ models size pluralize: basicName
 ]
 
 { #category : #execution }

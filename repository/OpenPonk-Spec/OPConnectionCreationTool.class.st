@@ -120,8 +120,8 @@ OPConnectionCreationTool >> selectedTargetControllers: aCollectionOfControllers 
 	(targetController canBeTargetFor: connectionController) ifFalse: [ 
 		^ self ].
 	targetController addAsTargetFor: connectionController.
-	self palette deselectTool.
-	self palette selectedTool selectedTargetControllers:
+	self palette selectSelectionTool.
+	self palette selectedTool selectedControllers:
 		{ connectionController }.
 	onComplete value: connectionController.
 	connectionController := nil.

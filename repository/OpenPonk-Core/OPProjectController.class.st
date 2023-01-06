@@ -232,19 +232,20 @@ OPProjectController >> navigatorAdapters [
 
 { #category : #opening }
 OPProjectController >> openDiagrams [
+
 	| selected |
 	project ensureModelsHaveDiagrams.
 	selected := project diagrams
-		detect: [ :each | each isOpen & each isSelected ]
-		ifNone: [ nil ].
+		            detect: [ :each | each isOpen & each isSelected ]
+		            ifNone: [ nil ].
 	(project diagrams sorted: #order ascending)
 		select: #isOpen
 		thenDo: [ :each | workbench openEditorOnDiagram: each ].
 	selected ifNotNil: [ workbench openEditorOnDiagram: selected ].
-	(project diagrams isNotEmpty
-		and: [ project diagrams noneSatisfy: #isOpen ])
-		ifTrue: [ project diagrams
-				do: [ :eachDiagram | workbench openEditorOnDiagram: eachDiagram ] ]
+	(project diagrams isNotEmpty and: [ 
+		 project diagrams noneSatisfy: #isOpen ]) ifTrue: [ 
+		project diagrams do: [ :eachDiagram | 
+			workbench openEditorOnDiagram: eachDiagram ] ]
 ]
 
 { #category : #opening }
@@ -389,7 +390,7 @@ OPProjectController >> updateDiagram: aDiagram [
 			aDiagram layout: ctrl layout.
 			aDiagram visibleElements: ctrl visibleElements copy.
 			aDiagram commonElements: ctrl commonElements.
-			aDiagram updateFromRoassalCanvas: ctrl view.
+			aDiagram updateFromRoassalCanvas: ctrl canvas.
 			aDiagram order: (controllers indexOf: ctrl) ]
 		ifNone: [ 
 			aDiagram
@@ -400,25 +401,26 @@ OPProjectController >> updateDiagram: aDiagram [
 
 { #category : #opening }
 OPProjectController >> updateDiagrams [
+
 	| focusedController |
-	focusedController := workbench focusedEditor
-		ifNotNil: [ :editor | editor diagramController ].
-	self project diagrams
-		do: [ :eachDiagram | 
-			controllers
-				detect: [ :ctrl | ctrl diagram = eachDiagram ]
-				ifFound: [ :ctrl | 
-					eachDiagram isOpen: true.
-					eachDiagram layout: ctrl layout copy.
-					eachDiagram commonElements: ctrl commonElements.
-					eachDiagram visibleElements: ctrl visibleElements copy.
-					eachDiagram updateFromRoassalCanvas: ctrl view.
-					eachDiagram order: (controllers indexOf: ctrl).
-					eachDiagram isSelected: ctrl = focusedController ]
-				ifNone: [ eachDiagram
-						isOpen: false;
-						order: -1;
-						isSelected: false ] ]
+	focusedController := workbench focusedEditor ifNotNil: [ :editor | 
+		                     editor diagramController ].
+	self project diagrams do: [ :eachDiagram | 
+		controllers
+			detect: [ :ctrl | ctrl diagram = eachDiagram ]
+			ifFound: [ :ctrl | 
+				eachDiagram isOpen: true.
+				eachDiagram layout: ctrl layout copy.
+				eachDiagram commonElements: ctrl commonElements.
+				eachDiagram visibleElements: ctrl visibleElements copy.
+				eachDiagram updateFromRoassalCanvas: ctrl canvas.
+				eachDiagram order: (controllers indexOf: ctrl).
+				eachDiagram isSelected: ctrl = focusedController ]
+			ifNone: [ 
+				eachDiagram
+					isOpen: false;
+					order: -1;
+					isSelected: false ] ]
 ]
 
 { #category : #accessing }

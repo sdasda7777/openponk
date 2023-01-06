@@ -18,7 +18,9 @@ Class {
 		'layouter',
 		'figuresBeingAdded',
 		'controllerFactory',
-		'canvas'
+		'lastClickPosition',
+		'lastSelectionPosition',
+		'canvasPresenter'
 	],
 	#category : #'OpenPonk-Core-Controllers'
 }
@@ -74,17 +76,12 @@ OPDiagramController >> addModelElement: aModelElement [
 { #category : #accessing }
 OPDiagramController >> addMouseEventsFor: aFigure [
 
-	aFigure when: RSMouseRightClick do: [ :event | 
-		| menu |
-		menu := CmdContextMenuActivation
-			        buildContextMenuFor: self
-			        inContext:
-			        (OPDiagramFigureContext for: self of: self selectedElements).
-		menu popUpInWorld ].
+	aFigure
+		when: RSMouseRightClick
+		do: [ :event | self figureContextClicked: event ].
 	aFigure
 		when: RSMouseEnter
-		do: [ :event | 
-		self diagramController hoverFigure: event shape ]
+		do: [ :event | self hoverFigure: event shape ]
 ]
 
 { #category : #accessing }
@@ -98,18 +95,14 @@ OPDiagramController >> addedFigureFor: aController [
 		ifTrue: [ figuresBeingAdded remove: aController ].
 
 	figure := aController figure.
-	self addMouseEventsFor: figure.
 
 	figure isNode ifTrue: [ 
-		figure translateTo:
-			(((self canvas propertyAt: OPRSEventLogger) lastOf:
-				  RSMouseLeftClick)
-				 ifNil: [ 0 @ 0 ]
-				 ifNotNil: [ :lastClick | lastClick position ]) ].
+		lastSelectionPosition ifNotNil: [ figure translateTo: lastSelectionPosition ] ].
 	self addMouseEventsFor: figure.
-	figure signalUpdate.
 
 	figuresBeingAdded ifEmpty: [ self updateCanvas ].
+	figure signalUpdate.
+	
 	^ figure
 ]
 
@@ -170,6 +163,23 @@ OPDiagramController >> cachedControllerForFigure: aFigure [
 ]
 
 { #category : #'controllers management' }
+OPDiagramController >> cachedControllerForFigure: aFigure ifNone: aBlock [
+
+	| ctrl |
+	figureToControllerCache ifNil: [ 
+		figureToControllerCache := Dictionary new.
+		self controllers do: [ :each | 
+			figureToControllerCache at: each figure put: each ] ].
+	ctrl := figureToControllerCache at: aFigure ifPresent: #yourself.
+	(self controllers includes: ctrl) ifTrue: [ ^ ctrl ].
+	ctrl := self controllers
+		        detect: [ :fresh | fresh figure = aFigure ]
+		        ifNone: [ ^ aBlock value ].
+	figureToControllerCache at: aFigure put: ctrl.
+	^ ctrl
+]
+
+{ #category : #'controllers management' }
 OPDiagramController >> cachedControllerForModel: aModel [
 	^ self
 		cachedControllerForModel: aModel
@@ -219,14 +229,20 @@ OPDiagramController >> canBeTargetFor: aController [
 
 { #category : #accessing }
 OPDiagramController >> canvas [
-	^ canvas
+	^ canvasPresenter canvas
 ]
 
 { #category : #accessing }
-OPDiagramController >> canvas: aCanvas [
+OPDiagramController >> canvasPresenter [
 
-	canvas := aCanvas.
-	self addMouseEventsFor: canvas
+	^ canvasPresenter
+]
+
+{ #category : #accessing }
+OPDiagramController >> canvasPresenter: aCanvasPresenter [
+
+	canvasPresenter := aCanvasPresenter.
+	self addMouseEventsFor: canvasPresenter canvas
 ]
 
 { #category : #rebuilding }
@@ -262,8 +278,16 @@ OPDiagramController >> controllerFactory [
 { #category : #'controllers management' }
 OPDiagramController >> controllerForFigure: aFigure [
 
-	aFigure = canvas ifTrue: [ ^ self ].
+	aFigure = self canvas ifTrue: [ ^ self ].
 	^ self cachedControllerForFigure: aFigure
+	"^ self controllers detect: [ :ctrl | ctrl figure = aFigure ]"
+]
+
+{ #category : #'controllers management' }
+OPDiagramController >> controllerForFigure: aFigure ifNone: aBlock [
+
+	aFigure = self canvas ifTrue: [ ^ self ].
+	^ self cachedControllerForFigure: aFigure ifNone: aBlock
 	"^ self controllers detect: [ :ctrl | ctrl figure = aFigure ]"
 ]
 
@@ -318,7 +342,6 @@ OPDiagramController >> createController: aModel [
 { #category : #'protocol-canvas' }
 OPDiagramController >> deselectAll [
 
-	canvas announce: TRResizeCanceled new.
 	self announcer announce: OPAllFiguresDeselected new
 ]
 
@@ -382,6 +405,20 @@ OPDiagramController >> figureAdded: aFigure [
 	^ self addedFigureFor: (self controllerForFigure: aFigure)
 ]
 
+{ #category : #accessing }
+OPDiagramController >> figureContextClicked: anEvent [
+
+	| shapes menu |
+	shapes := (self selectedElements includes: anEvent shape)
+		          ifTrue: [ self selectedElements ]
+		          ifFalse: [ { anEvent shape } ].
+	menu := CmdContextMenuActivation
+		        buildContextMenuFor: self canvasPresenter
+		        inContext:
+		        (OPDiagramFigureContext for: self canvasPresenter of: shapes).
+	menu popUpInWorld
+]
+
 { #category : #deprecated }
 OPDiagramController >> figureFor: aModel [
 	self
@@ -400,6 +437,14 @@ OPDiagramController >> figureForModel: aModel [
 OPDiagramController >> form [
 
 	^ self editor form
+]
+
+{ #category : #'controllers management' }
+OPDiagramController >> hasControllerForFigure: aFigure [
+
+	^ aFigure = self canvas or: [ 
+		  self cachedControllerForFigure: aFigure ifNone: [ ^ false ].
+		  true ]
 ]
 
 { #category : #'controllers management' }
@@ -494,7 +539,7 @@ OPDiagramController >> layout: aLayout [
 		self controllers
 			detect: [ :ctrl | ctrl model uuid = key ]
 			ifFound: [ :ctrl | ctrl layout: value ] ].
-	self updateView
+	self updateCanvas
 ]
 
 { #category : #accessing }
@@ -580,12 +625,15 @@ OPDiagramController >> rebuild [
 	controllers := nil.
 	[ :job | 
 	job title: 'Preparing diagram'.
-	self cleanCanvas.
 	diagram ifNil: [ 
-		^ self showDiagram: (OPDiagram withWholeModel: model) ].
+		^ self
+			  diagram: (OPDiagram withWholeModel: model);
+			  rebuild ].
+	self cleanCanvas.
 	diagram camera ifNotNil: [ :camera | 
-		canvas camera translateTo: camera offset.
-		canvas camera scale: camera zoom ].
+		self canvas camera
+			translateTo: camera offset;
+			scale: camera zoom ].
 	self addCommonElementsFromDiagram.
 	self showElements.
 	diagram layout
@@ -640,6 +688,12 @@ OPDiagramController >> removeFigure [
 	self figure ifNotNil: [ self figure shapes copy do: #remove ]
 ]
 
+{ #category : #destruction }
+OPDiagramController >> removeFromCanvas: aFigure [
+	aFigure ifNil: [ ^ self ].
+	(self controllerForFigure: aFigure) removeFull
+]
+
 { #category : #deprecated }
 OPDiagramController >> removeFromModel: aModel [
 	"Remove aModel from the diagram.
@@ -650,12 +704,6 @@ OPDiagramController >> removeFromModel: aModel [
 
 "	self assert: (self controllerForModel: aModel) model = aModel.
 	(self controllerForModel: aModel owner) removeModelElement: aModel"
-]
-
-{ #category : #destruction }
-OPDiagramController >> removeFromView: aFigure [
-	aFigure ifNil: [ ^ self ].
-	(self controllerForFigure: aFigure) removeFull
 ]
 
 { #category : #deprecated }
@@ -681,23 +729,11 @@ OPDiagramController >> saveState [
 	self editor workbench projectController autoSave: memento"
 ]
 
-{ #category : #'protocol-canvas' }
-OPDiagramController >> selectCanvas [
-	selectionHolder value: self
-]
-
 { #category : #'ui interaction' }
 OPDiagramController >> selectController: aController [
 
 	self editor palette selectSelectionTool selectedTool 
 		selectedTargetControllers: { aController }
-]
-
-{ #category : #'protocol-canvas' }
-OPDiagramController >> selectFigure: aFigure [
-	| controller |
-	controller := self controllerForFigure: aFigure.
-	selectionHolder value: controller
 ]
 
 { #category : #figures }
@@ -712,8 +748,9 @@ OPDiagramController >> selectedElements [
 ]
 
 { #category : #'protocol-canvas' }
-OPDiagramController >> selectedShapes: shapes [
+OPDiagramController >> selectedShapes: shapes onPosition: aPoint [
 
+	lastSelectionPosition := aPoint.
 	self editor palette selectedTool selectedControllers:
 		(shapes collect: [ :each | self controllerForFigure: each ])
 ]
@@ -726,12 +763,6 @@ OPDiagramController >> showAllElements [
 	self controllers
 		select: [ :each | each isKindOf: OPController ]
 		thenDo: #refreshFigure
-]
-
-{ #category : #views }
-OPDiagramController >> showDiagram: aDiagram [
-	diagram := aDiagram.
-	self rebuild
 ]
 
 { #category : #rebuilding }
@@ -797,17 +828,6 @@ OPDiagramController >> view [
 ]
 
 { #category : #accessing }
-OPDiagramController >> view: aView [
-
-	self
-		deprecated: 'Use #canvas: instead.'
-		transformWith:
-		'`@receiver view: `@statements1'
-		-> '`@receiver canvas: `@statements1'.
-	^ self canvas: aView
-]
-
-{ #category : #accessing }
 OPDiagramController >> visibleElements [
 	^ self allShowableElements
 		select: [ :el | self isVisibleInDiagram: el ]
@@ -840,16 +860,6 @@ OPDiagramController >> whenAllDeselectedDo: aBlock [
 { #category : #'protocol-events' }
 OPDiagramController >> whenFigureAdded: aBlock [
 	figureAdded := aBlock ifNil: [ [ :figure |  ] ]
-]
-
-{ #category : #'protocol-events' }
-OPDiagramController >> whenHoverChanged: aBlock [
-	hoverHolder := aBlock
-]
-
-{ #category : #'protocol-events' }
-OPDiagramController >> whenSelectionChanged: aBlock [
-	selectionHolder := aBlock
 ]
 
 { #category : #accessing }

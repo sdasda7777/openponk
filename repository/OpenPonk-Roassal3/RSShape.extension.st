@@ -17,6 +17,15 @@ RSShape >> isElement [
 ]
 
 { #category : #'*OpenPonk-Roassal3' }
+RSShape >> shape [
+
+	self
+		deprecated: 'This is a shape.'
+		transformWith: '`@receiver shape' -> '`@receiver'.
+	^ self
+]
+
+{ #category : #'*OpenPonk-Roassal3' }
 RSShape >> view [
 
 	self

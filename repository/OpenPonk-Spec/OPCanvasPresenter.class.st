@@ -14,15 +14,7 @@ Class {
 { #category : #accessing }
 OPCanvasPresenter >> attachController: aDiagramController [
 
-	(diagramController := aDiagramController) canvas: self canvas
-]
-
-{ #category : #'selection handling' }
-OPCanvasPresenter >> canvasClicked: anEvent [
-
-	self deprecated: 'Last click is now handled by OPRSEventLogger'.
-	self lastClickPosition: anEvent position.
-	self diagramController selectCanvas
+	(diagramController := aDiagramController) canvasPresenter: self
 ]
 
 { #category : #'selection handling' }
@@ -122,7 +114,7 @@ OPCanvasPresenter >> exportCanvasToPng: aFile silently: aSilentlyBoolean [
 
 	self
 		exportCanvasToPng: aFile
-		zoom: 1.000000
+		zoom: 1.0
 		silently: aSilentlyBoolean
 ]
 
@@ -277,23 +269,22 @@ OPCanvasPresenter >> initialize [
 { #category : #initialization }
 OPCanvasPresenter >> initializeCanvas: aCanvas [
 
-	| canvasController labelMousePos labelMousePosCam labelScale labelCamPos s1 s2 labelLastClick |
+	| labelMousePos labelMousePosCam labelScale labelCamPos labelLastClick |
 	aCanvas
 		when: RSMouseRightClick
 		do: [ :event | self canvasContextClicked: event ].
-	canvasController := RSCanvasController new.
-	canvasController interactionsFromArray: { 
-			RSKeyNavigationCanvasInteraction new.
-			RSZoomableCanvasInteraction new.
-			RSScrollBarsCanvasInteraction new }.
-	aCanvas @ canvasController.
+	"aCanvas @ RSKeyNavigationCanvasInteraction.
+	aCanvas @ RSZoomableCanvasInteraction.
+	aCanvas @ RSScrollBarsCanvasInteraction."
 	aCanvas @ (OPRSSelectableCanvas new
 		 rightLeft;
 		 yourself).
-	aCanvas @ OPRSEventLogger.
 	(aCanvas propertyAt: OPRSSelectableCanvas)
-		when: RSSelectionEndEvent
-		do: [ :evt | self selectedShapes: evt selectedShapes ].
+		when: OPRSSelectionEndEvent
+		do: [ :evt | 
+			self
+				selectedShapes: evt selectedShapes
+				onPosition: evt originalEvent position ].
 
 	labelMousePos := RSLabel new
 		                 isFixed: true;
@@ -315,34 +306,18 @@ OPCanvasPresenter >> initializeCanvas: aCanvas [
 		                  isFixed: true;
 		                  translateTo: 400 @ 90;
 		                  yourself.
-	s1 := RSBox new
-		      color: Color green;
-		      translateTo: 200 @ 200;
-		      yourself.
-	s2 := RSBox new
-		      color: Color red;
-		      translateTo: -200 @ -200;
-		      yourself.
 	aCanvas
-		add: s1;
-		add: s2;
 		add: labelMousePos;
 		add: labelMousePosCam;
 		add: labelScale;
 		add: labelCamPos;
 		add: labelLastClick.
-	aCanvas when: RSMouseMove do: [ :e | 
+	aCanvas when: RSAbstractMouseEvent do: [ :e | 
 		labelMousePos text: 'mouse pos: ' , e position asString.
 		labelMousePosCam text:
 			'mouse posFromCam: ' , e positionFromCamera asString.
 		labelScale text: 'scale: ' , aCanvas camera scale asString.
 		labelCamPos text: 'cam position: ' , aCanvas position asString.
-		labelLastClick text: 'last click: '
-			,
-				(((self canvas propertyAt: OPRSEventLogger) lastOf:
-					  RSMouseLeftClick)
-					 ifNil: [ 0 @ 0 ]
-					 ifNotNil: [ :lastClick | lastClick position ]) asString.
 		aCanvas signalUpdate ].
 
 	self flag: #TODO_R3.
@@ -405,8 +380,8 @@ OPCanvasPresenter >> selectedElements [
 ]
 
 { #category : #'selection handling' }
-OPCanvasPresenter >> selectedShapes: shapes [
-	self diagramController selectedShapes: shapes
+OPCanvasPresenter >> selectedShapes: shapes onPosition: aPoint [
+	self diagramController selectedShapes: shapes onPosition: aPoint
 ]
 
 { #category : #'as yet unclassified' }

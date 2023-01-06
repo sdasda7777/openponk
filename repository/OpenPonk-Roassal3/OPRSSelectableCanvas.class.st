@@ -10,8 +10,15 @@ Class {
 { #category : #'event processing' }
 OPRSSelectableCanvas >> boxEnded: event [
 
-	multiselectEnabled ifFalse: [ ^ self ].
-	^ super boxEnded: event
+	| boxEvent |
+	boxEvent := self createEvent: OPRSSelectionEndEvent with: event.
+	boxEvent shape remove.
+	event canvas removeKey: self className.
+	boxEvent
+		selectedShapes: selectedShapes;
+		originalEvent: event.
+	self announce: boxEvent.
+	event signalUpdate
 ]
 
 { #category : #'event processing' }
@@ -84,5 +91,5 @@ OPRSSelectableCanvas >> selectShapes: aGroup byEvent: anEvent [
 			 oldSelectedShapes: selectedShapes;
 			 selectedShapes: (selectedShapes := aGroup);
 			 yourself).
-	super boxEnded: anEvent
+	self boxEnded: anEvent
 ]
