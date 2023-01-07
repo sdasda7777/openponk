@@ -164,7 +164,7 @@ OPLayouter >> updateCanvas [
 	| canvas |
 	canvas := diagramController canvas.
 	canvas signalUpdate.
-	canvas nodes
+	canvas shapes
 		ifEmpty: [ canvas camera scale: 1 ]
 		ifNotEmpty: [ canvas zoomToFit ]
 ]

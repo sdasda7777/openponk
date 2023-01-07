@@ -45,11 +45,19 @@ OPRSSelectable >> onShape: aShape [
 		aShape canvas
 			propertyAt: OPRSSelectableCanvas
 			ifPresent: [ :selectableCanvasInteraction | 
+				| currentlySelectedShapes |
+				currentlySelectedShapes := selectableCanvasInteraction
+					                           selectedShapes.
 				selectableCanvasInteraction
-					selectShapes: (RSGroup streamContents: [ :s | 
-							 evt metaKeyPressed ifTrue: [ 
-								 s nextPutAll: selectableCanvasInteraction selectedShapes ].
-							 s nextPut: aShape ])
+					selectShapes: (evt metaKeyPressed
+							 ifTrue: [ 
+								 (currentlySelectedShapes includes: aShape)
+									 ifTrue: [ 
+									 RSGroup withAll:
+										 (currentlySelectedShapes copyWithout: aShape) ]
+									 ifFalse: [ 
+									 RSGroup withAll: currentlySelectedShapes , aShape ] ]
+							 ifFalse: [ RSGroup with: aShape ])
 					byEvent: evt ]
 			ifAbsent: [ 
 				self error:

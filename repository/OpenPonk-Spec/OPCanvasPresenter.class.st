@@ -386,7 +386,7 @@ OPCanvasPresenter >> selectedShapes: shapes onPosition: aPoint [
 { #category : #'as yet unclassified' }
 OPCanvasPresenter >> showAllFigures [
 
-	self canvas nodes
+	self canvas shapes
 		ifEmpty: [ self canvas camera scale: 1 ]
 		ifNotEmpty: [ self canvas zoomToFit ]
 ]
