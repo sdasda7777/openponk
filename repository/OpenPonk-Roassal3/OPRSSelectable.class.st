@@ -56,7 +56,9 @@ OPRSSelectable >> onShape: aShape [
 									 RSGroup withAll:
 										 (currentlySelectedShapes copyWithout: aShape) ]
 									 ifFalse: [ 
-									 RSGroup withAll: currentlySelectedShapes , aShape ] ]
+										 (RSGroup withAll: currentlySelectedShapes)
+											 add: aShape;
+											 yourself ] ]
 							 ifFalse: [ RSGroup with: aShape ])
 					byEvent: evt ]
 			ifAbsent: [ 
