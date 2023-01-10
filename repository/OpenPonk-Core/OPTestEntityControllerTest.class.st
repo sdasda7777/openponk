@@ -187,5 +187,5 @@ OPTestEntityControllerTest >> testRemoveFigureAndModel [
 OPTestEntityControllerTest >> testShowInDiagram [
 	controller model: model.
 	controller showWithoutDependentInDiagram: diagramController.
-	self assert: (diagramController controllerForFigure: controller figure) equals: controller
+	self assert: (diagramController controllerForRoassalShape: controller figure) equals: controller
 ]

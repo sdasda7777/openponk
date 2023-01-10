@@ -66,8 +66,7 @@ OPRSSelectableCanvas >> initialize [
 	super initialize.
 	selectedShapes := RSGroup new.
 	self
-		targetShapes: [ :canvas | 
-			canvas shapes select: [ :each | each hasProperty: OPRSSelectable ] ];
+		targetShapes: [ :canvas | canvas shapes select: #isSelectable ];
 		enableMultiselect
 ]
 

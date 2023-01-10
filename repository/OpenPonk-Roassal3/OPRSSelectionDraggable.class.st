@@ -22,15 +22,30 @@ OPRSSelectionDraggable >> processDrag: evt [
 
 	| d selectedShapes shapesToMove |
 	d := evt camera distanceFromPixelToSpace: evt step.
-	selectedShapes := (evt canvas
-		                   propertyAt: #selected_shapes
-		                   ifAbsent: [ { evt shape } ]) ifEmpty: [ 
-		                  { evt shape } ].
+	selectedShapes := evt canvas selectedShapes ifEmpty: [ { evt shape } ].
 	shapesToMove := (selectedShapes includes: evt shape)
 		                ifTrue: [ 
-			                selectedShapes select: [ :each | 
-				                each hasProperty: self class ] ]
+		                selectedShapes select: [ :each | 
+			                each hasProperty: self class ] ]
 		                ifFalse: [ { evt shape } ].
-	shapesToMove do: [ :each | each translateBy: d ].
+	shapesToMove do: [ :each | self translateShape: each by: d ].
 	evt signalUpdate
+]
+
+{ #category : #events }
+OPRSSelectionDraggable >> translateShape: aShape by: aPoint [
+
+	| shapeEncompassingRectangle draggableNodesInside |
+	aShape translateBy: aPoint.
+	shapeEncompassingRectangle := aShape encompassingRectangle.
+	draggableNodesInside := aShape canvas nodes select: [ :each | 
+		                        each isFixed not and: [ 
+			                        (shapeEncompassingRectangle containsRect:
+				                         each encompassingRectangle) and: [ 
+				                        shapeEncompassingRectangle
+				                        ~= each encompassingRectangle and: [ 
+					                        each isSelectionDraggable ] ] ] ].
+	draggableNodesInside
+		reject: #isSelected
+		thenDo: [ :each | self translateShape: each by: aPoint ]
 ]

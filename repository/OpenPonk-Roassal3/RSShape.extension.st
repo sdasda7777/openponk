@@ -17,6 +17,27 @@ RSShape >> isElement [
 ]
 
 { #category : #'*OpenPonk-Roassal3' }
+RSShape >> isSelectable [
+
+	^ self hasProperty: OPRSSelectable
+]
+
+{ #category : #'*OpenPonk-Roassal3' }
+RSShape >> isSelected [
+
+	^ self canvas
+		  ifNil: [ false ]
+		  ifNotNil: [ :currentCanvas | 
+		  currentCanvas selectedShapes includes: self ]
+]
+
+{ #category : #'*OpenPonk-Roassal3' }
+RSShape >> isSelectionDraggable [
+
+	^ self hasProperty: OPRSSelectionDraggable
+]
+
+{ #category : #'*OpenPonk-Roassal3' }
 RSShape >> shape [
 
 	self

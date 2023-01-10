@@ -10,6 +10,18 @@ RSCanvas >> elements [
 ]
 
 { #category : #'*OpenPonk-Roassal3' }
+RSCanvas >> isSelectable [
+
+	^ false
+]
+
+{ #category : #'*OpenPonk-Roassal3' }
+RSCanvas >> selectedShapes [
+
+	^ self propertyAt: #selected_shapes ifAbsent: [ #(  ) ]
+]
+
+{ #category : #'*OpenPonk-Roassal3' }
 RSCanvas >> view [
 
 	self

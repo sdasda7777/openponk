@@ -40,7 +40,7 @@ OPDiagramFigureContext >> figures: aCollection [
 
 	figures := aCollection.
 	controllers := figures collect: [ :each | 
-		               self diagramController controllerForFigure: each ]
+		               self diagramController controllerForRoassalShape: each ]
 ]
 
 { #category : #accessing }

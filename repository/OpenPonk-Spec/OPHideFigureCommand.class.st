@@ -13,7 +13,6 @@ OPHideFigureCommand class >> canvasShortcutActivation [
 { #category : #execution }
 OPHideFigureCommand >> basicExecute [
 
-	controllers
-		select: #isHideable
-		thenDo: [ :each | executor hideElements: each model ]
+	executor hideElements:
+		(controllers select: #isHideable thenCollect: #model)
 ]

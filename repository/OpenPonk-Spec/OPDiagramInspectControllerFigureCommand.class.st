@@ -29,5 +29,5 @@ OPDiagramInspectControllerFigureCommand >> defaultMenuItemName [
 OPDiagramInspectControllerFigureCommand >> execute [
 
 	(figures collect: [ :each | 
-		 diagramController controllerForFigure: each ]) inspect
+		 diagramController controllerForRoassalShape: each ]) inspect
 ]

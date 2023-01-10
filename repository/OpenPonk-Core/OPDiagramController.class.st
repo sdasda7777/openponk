@@ -81,7 +81,7 @@ OPDiagramController >> addMouseEventsFor: aFigure [
 		do: [ :event | self figureContextClicked: event ].
 	aFigure
 		when: RSMouseEnter
-		do: [ :event | self hoverFigure: event shape ]
+		do: [ :event | self hoverRoassalShape: event shape ]
 ]
 
 { #category : #accessing }
@@ -94,15 +94,16 @@ OPDiagramController >> addedFigureFor: aController [
 				'DiagramController>>#addedFigureFor: added figure not previously marked as being added' ]
 		ifTrue: [ figuresBeingAdded remove: aController ].
 
-	figure := aController figure.
+	figure := aController roassalShape.
 
 	figure isNode ifTrue: [ 
-		lastSelectionPosition ifNotNil: [ figure translateTo: lastSelectionPosition ] ].
+		lastSelectionPosition ifNotNil: [ 
+			figure translateTo: lastSelectionPosition ] ].
 	self addMouseEventsFor: figure.
 
 	figuresBeingAdded ifEmpty: [ self updateCanvas ].
 	figure signalUpdate.
-	
+
 	^ figure
 ]
 
@@ -148,38 +149,6 @@ OPDiagramController >> autosaveManager [
 ]
 
 { #category : #'controllers management' }
-OPDiagramController >> cachedControllerForFigure: aFigure [
-	| ctrl |
-	figureToControllerCache
-		ifNil: [ figureToControllerCache := Dictionary new.
-			self controllers
-				do: [ :each | figureToControllerCache at: each figure put: each ] ].
-	ctrl := figureToControllerCache at: aFigure ifPresent: #yourself.
-	(self controllers includes: ctrl)
-		ifTrue: [ ^ ctrl ].
-	ctrl := self controllers detect: [ :fresh | fresh figure = aFigure ].
-	figureToControllerCache at: aFigure put: ctrl.
-	^ ctrl
-]
-
-{ #category : #'controllers management' }
-OPDiagramController >> cachedControllerForFigure: aFigure ifNone: aBlock [
-
-	| ctrl |
-	figureToControllerCache ifNil: [ 
-		figureToControllerCache := Dictionary new.
-		self controllers do: [ :each | 
-			figureToControllerCache at: each figure put: each ] ].
-	ctrl := figureToControllerCache at: aFigure ifPresent: #yourself.
-	(self controllers includes: ctrl) ifTrue: [ ^ ctrl ].
-	ctrl := self controllers
-		        detect: [ :fresh | fresh figure = aFigure ]
-		        ifNone: [ ^ aBlock value ].
-	figureToControllerCache at: aFigure put: ctrl.
-	^ ctrl
-]
-
-{ #category : #'controllers management' }
 OPDiagramController >> cachedControllerForModel: aModel [
 	^ self
 		cachedControllerForModel: aModel
@@ -218,6 +187,38 @@ OPDiagramController >> cachedControllerForModel: aModel ifNone: aNoneBlock [
 		detect: [ :fresh | fresh model = aModel ]
 		ifNone: [ ^ aNoneBlock value ].
 	modelToControllerCache at: aModel put: ctrl.
+	^ ctrl
+]
+
+{ #category : #'controllers management' }
+OPDiagramController >> cachedControllerForRoassalShape: aFigure [
+
+	| ctrl |
+	figureToControllerCache ifNil: [ 
+		figureToControllerCache := Dictionary new.
+		self controllers do: [ :each | 
+			figureToControllerCache at: each roassalShape put: each ] ].
+	ctrl := figureToControllerCache at: aFigure ifPresent: #yourself.
+	(self controllers includes: ctrl) ifTrue: [ ^ ctrl ].
+	ctrl := self controllers detect: [ :fresh | fresh roassalShape = aFigure ].
+	figureToControllerCache at: aFigure put: ctrl.
+	^ ctrl
+]
+
+{ #category : #'controllers management' }
+OPDiagramController >> cachedControllerForRoassalShape: aFigure ifNone: aBlock [
+
+	| ctrl |
+	figureToControllerCache ifNil: [ 
+		figureToControllerCache := Dictionary new.
+		self controllers do: [ :each | 
+			figureToControllerCache at: each figure put: each ] ].
+	ctrl := figureToControllerCache at: aFigure ifPresent: #yourself.
+	(self controllers includes: ctrl) ifTrue: [ ^ ctrl ].
+	ctrl := self controllers
+		        detect: [ :fresh | fresh roassalShape = aFigure ]
+		        ifNone: [ ^ aBlock value ].
+	figureToControllerCache at: aFigure put: ctrl.
 	^ ctrl
 ]
 
@@ -276,22 +277,6 @@ OPDiagramController >> controllerFactory [
 ]
 
 { #category : #'controllers management' }
-OPDiagramController >> controllerForFigure: aFigure [
-
-	aFigure = self canvas ifTrue: [ ^ self ].
-	^ self cachedControllerForFigure: aFigure
-	"^ self controllers detect: [ :ctrl | ctrl figure = aFigure ]"
-]
-
-{ #category : #'controllers management' }
-OPDiagramController >> controllerForFigure: aFigure ifNone: aBlock [
-
-	aFigure = self canvas ifTrue: [ ^ self ].
-	^ self cachedControllerForFigure: aFigure ifNone: aBlock
-	"^ self controllers detect: [ :ctrl | ctrl figure = aFigure ]"
-]
-
-{ #category : #'controllers management' }
 OPDiagramController >> controllerForModel: aModel [
 	aModel = model
 		ifTrue: [ ^ self ].
@@ -310,6 +295,22 @@ OPDiagramController >> controllerForModel: aModel ifNone: aFoundBlock [
 	aModel = model
 		ifTrue: [ ^ self ].
 	^ self cachedControllerForModel: aModel ifNone: aFoundBlock
+]
+
+{ #category : #'controllers management' }
+OPDiagramController >> controllerForRoassalShape: aFigure [
+
+	aFigure = self canvas ifTrue: [ ^ self ].
+	^ self cachedControllerForRoassalShape: aFigure
+	"^ self controllers detect: [ :ctrl | ctrl figure = aFigure ]"
+]
+
+{ #category : #'controllers management' }
+OPDiagramController >> controllerForRoassalShape: aFigure ifNone: aBlock [
+
+	aFigure = self canvas ifTrue: [ ^ self ].
+	^ self cachedControllerForRoassalShape: aFigure ifNone: aBlock
+	"^ self controllers detect: [ :ctrl | ctrl figure = aFigure ]"
 ]
 
 { #category : #deprecated }
@@ -402,7 +403,7 @@ OPDiagramController >> figureAdded: aFigure [
 		transformWith: '`@receiver figureAdded: `@statements1'
 			->
 			'`@receiver addedFigureFor: (`@receiver controllerForFigure: `@statements1)'.
-	^ self addedFigureFor: (self controllerForFigure: aFigure)
+	^ self addedFigureFor: (self controllerForRoassalShape: aFigure)
 ]
 
 { #category : #accessing }
@@ -443,7 +444,7 @@ OPDiagramController >> form [
 OPDiagramController >> hasControllerForFigure: aFigure [
 
 	^ aFigure = self canvas or: [ 
-		  self cachedControllerForFigure: aFigure ifNone: [ ^ false ].
+		  self cachedControllerForRoassalShape: aFigure ifNone: [ ^ false ].
 		  true ]
 ]
 
@@ -492,9 +493,9 @@ OPDiagramController >> hoverController: aController [
 ]
 
 { #category : #'protocol-canvas' }
-OPDiagramController >> hoverFigure: aFigure [
+OPDiagramController >> hoverRoassalShape: aFigure [
 
-	self hoverController: (self controllerForFigure: aFigure)
+	self hoverController: (self controllerForRoassalShape: aFigure)
 ]
 
 { #category : #'ui interaction' }
@@ -573,7 +574,7 @@ OPDiagramController >> modelClass [
 
 { #category : #accessing }
 OPDiagramController >> modelForFigure: aFigure [
-	^ (self controllerForFigure: aFigure) model
+	^ (self controllerForRoassalShape: aFigure) model
 ]
 
 { #category : #'events handling' }
@@ -691,7 +692,7 @@ OPDiagramController >> removeFigure [
 { #category : #destruction }
 OPDiagramController >> removeFromCanvas: aFigure [
 	aFigure ifNil: [ ^ self ].
-	(self controllerForFigure: aFigure) removeFull
+	(self controllerForRoassalShape: aFigure) removeFull
 ]
 
 { #category : #deprecated }
@@ -718,6 +719,12 @@ OPDiagramController >> removeModelElement: aModelElement [
 "	model remove: aModelElement"
 
 	(self controllerForModel: aModelElement) removeModel
+]
+
+{ #category : #accessing }
+OPDiagramController >> roassalShape [
+
+	^ self canvas
 ]
 
 { #category : #'undo/redo' }
@@ -752,7 +759,7 @@ OPDiagramController >> selectedShapes: shapes onPosition: aPoint [
 
 	lastSelectionPosition := aPoint.
 	self editor palette selectedTool selectedControllers:
-		(shapes collect: [ :each | self controllerForFigure: each ])
+		(shapes collect: [ :each | self controllerForRoassalShape: each ])
 ]
 
 { #category : #rebuilding }
@@ -804,7 +811,9 @@ OPDiagramController >> undo [
 
 { #category : #userinterface }
 OPDiagramController >> updateCanvas [
-	self controllers do: [ :each | each refreshFigure ]
+
+	self controllers do: [ :each | 
+		each diagramElement updateRenderFromModel ]
 ]
 
 { #category : #userinterface }

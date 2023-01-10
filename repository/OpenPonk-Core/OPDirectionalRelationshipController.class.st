@@ -14,16 +14,9 @@ Class {
 }
 
 { #category : #hooks }
-OPDirectionalRelationshipController >> connectionFeedback [
-	^ OPRSInteractiveLine new
-		lineBuilder:
-				[ :fromFigure :toFigure | self createLineFrom: fromFigure to: toFigure ];
-		from: source figure
-]
-
-{ #category : #hooks }
 OPDirectionalRelationshipController >> createLineFrom: fromElement to: toElement [
-	^ self subclassResponsibility
+
+	self deprecated: 'This is responsibility of DI shapes now'.
 ]
 
 { #category : #construction }
@@ -37,10 +30,9 @@ OPDirectionalRelationshipController >> createModelIn: aParentModel [
 
 { #category : #hooks }
 OPDirectionalRelationshipController >> edgeBuilder [
-	self
-		deprecated:
-			'Depracated without replacement - use Roassal directly or define own figures'.
-	^ self subclassResponsibility
+
+	self deprecated:
+		'Depracated without replacement - use Roassal directly or define own figures'
 ]
 
 { #category : #'canvas actions' }
@@ -58,6 +50,12 @@ OPDirectionalRelationshipController >> modelSource [
 { #category : #accessing }
 OPDirectionalRelationshipController >> modelTarget [
 	^ model target
+]
+
+{ #category : #rendering }
+OPDirectionalRelationshipController >> renderSimplified [
+
+	diagramElement := self diagramElementClass renderSimplifiedForController: self.
 ]
 
 { #category : #'canvas actions' }

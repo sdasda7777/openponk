@@ -11,10 +11,10 @@ Class {
 		'connectionController',
 		'factory',
 		'feedback',
-		'connectionFeedback',
 		'onComplete',
 		'hoverAction',
-		'selectionAction'
+		'selectionAction',
+		'edgeCreationTargetController'
 	],
 	#category : #'OpenPonk-Spec-Palettes'
 }
@@ -22,10 +22,10 @@ Class {
 { #category : #protocol }
 OPConnectionCreationTool >> deselect [
 	feedback value: nil.
-	connectionFeedback
+	edgeCreationTargetController
 		ifNotNil: [ 
-			connectionFeedback remove.
-			connectionFeedback := nil ]
+			edgeCreationTargetController remove.
+			edgeCreationTargetController := nil ]
 ]
 
 { #category : #accessing }
@@ -106,8 +106,9 @@ OPConnectionCreationTool >> selectedSourceControllers: aCollectionOfControllers 
 	(targetController canBeSourceFor: connectionController) ifFalse: [ 
 		^ self ].
 	targetController addAsSourceFor: connectionController.
-	connectionFeedback := connectionController connectionFeedback.
-	connectionFeedback renderIn: targetController figure canvas.
+	edgeCreationTargetController := OPEdgeCreationTargetController 
+		                                renderForEdgeController:
+		                                connectionController.
 	self selectTarget
 ]
 

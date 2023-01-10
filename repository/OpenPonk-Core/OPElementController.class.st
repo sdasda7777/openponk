@@ -5,9 +5,6 @@ It has method which handles the creation of the form for specific element. The c
 Class {
 	#name : #OPElementController,
 	#superclass : #OPController,
-	#instVars : [
-		'figure'
-	],
 	#category : #'OpenPonk-Core-Controllers'
 }
 
@@ -68,14 +65,17 @@ OPElementController >> createModelIn: aParentModel andShowInDiagram: aDiagramCon
 	self showWithoutDependentInDiagram: aDiagramController
 ]
 
-{ #category : #accessing }
-OPElementController >> figure [
-	^ figure
+{ #category : #construction }
+OPElementController >> diagramElementClass [
+
+	^ self subclassResponsibility
 ]
 
-{ #category : #accessing }
+{ #category : #figures }
 OPElementController >> figure: aFigure [
-	figure := aFigure
+
+	self deprecated:
+		'Figure (Roassal shape) cannot be set directly anymore.'
 ]
 
 { #category : #deprecated }
@@ -136,17 +136,30 @@ OPElementController >> remove [
 ]
 
 { #category : #construction }
+OPElementController >> render [
+
+	self diagramController addingFigureFor: self.
+	diagramElement := self diagramElementClass renderForController: self.
+	^ self diagramController addedFigureFor: self
+]
+
+{ #category : #construction }
 OPElementController >> renderFigureIn: aCanvas [
-	^ self subclassResponsibility
+
+	self
+		deprecated: 'Use #render without parameter.'
+		transformWith:
+		'`@receiver renderFigureIn: `@statements1' -> '`@receiver render'.
+	^ self render
 ]
 
 { #category : #construction }
 OPElementController >> showInDiagram: aDiagramController [
+
 	aDiagramController addController: self.
-	self renderFigureIn: aDiagramController view.
-	self dependentElements
-		do:
-			[ :each | aDiagramController showInDiagramModel: each ]
+	self render.
+	self dependentElements do: [ :each | 
+		aDiagramController showInDiagramModel: each ]
 ]
 
 { #category : #'canvas actions' }
@@ -158,7 +171,7 @@ OPElementController >> showSelectionFeedback [
 OPElementController >> showWithoutDependentInDiagram: aDiagramController [
 
 	aDiagramController addController: self.
-	self renderFigureIn: aDiagramController canvas
+	self render
 ]
 
 { #category : #accessing }

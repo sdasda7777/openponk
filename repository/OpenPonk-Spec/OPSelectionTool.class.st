@@ -38,11 +38,10 @@ OPSelectionTool >> select [
 OPSelectionTool >> selectedControllers: aCollectionOfControllers [
 
 	| originalFigures newFigures |
-	
-	originalFigures := selectedControllers collect: #figure.
-	newFigures := aCollectionOfControllers collect: #figure.
+	originalFigures := selectedControllers collect: #roassalShape.
+	newFigures := aCollectionOfControllers collect: #roassalShape.
 	originalFigures , newFigures
-		detect: [ :any | (any hasProperty: OPRSSelectable) ]
+		detect: #isSelectable
 		ifFound: [ :fig | 
 			(fig propertyAt: OPRSSelectable) doHighlightShapes: newFigures ].
 	selectedControllers := aCollectionOfControllers.

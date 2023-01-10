@@ -6,7 +6,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'model',
-		'diagramController'
+		'diagramController',
+		'diagramElement'
 	],
 	#category : #'OpenPonk-Core-Controllers'
 }
@@ -108,20 +109,32 @@ OPController >> diagramController: aDiagramController [
 ]
 
 { #category : #accessing }
+OPController >> diagramElement [
+
+	^ diagramElement
+]
+
+{ #category : #accessing }
 OPController >> elementsToShowInside [
 	^ #()
 ]
 
 { #category : #figures }
 OPController >> figure [
+
+	self
+		deprecated: 'Use #diagramElement instead'
+		transformWith: '`@receiver figure' -> '`@receiver diagramElement'.
+
 	^ self subclassResponsibility
 ]
 
 { #category : #'canvas actions' }
 OPController >> hideSelectionFeedback [
+
 	"by default do nothing"
 
-	
+	self deprecated: 'Should be moved to DI'
 ]
 
 { #category : #announcements }
@@ -184,12 +197,17 @@ OPController >> nameOfType [
 { #category : #figures }
 OPController >> refreshFigure [
 
-	self figure announce: (RSPositionChangedEvent new
-			 shape: self figure;
-			 oldPosition: self figure position;
-			 newPosition: self figure position).
-	self figure signalUpdate.
-	^ self figure
+	self
+		deprecated: 'Use #diagramElement updateRenderFromModel instead'
+		transformWith: '`@receiver refreshFigure'
+			-> '`@receiver diagramElement updateRenderFromModel'.
+
+	self roassalShape announce: (RSPositionChangedEvent new
+			 shape: self roassalShape;
+			 oldPosition: self roassalShape position;
+			 newPosition: self roassalShape position).
+	self roassalShape signalUpdate.
+	^ self roassalShape
 ]
 
 { #category : #deprecated }
@@ -202,7 +220,8 @@ OPController >> remove [
 OPController >> removeController [
 	model ifNotNil: [ self removeDependentControllers ].
 	self diagramController ifNil: [ ^ self ].
-	self removeFigure.
+	self diagramController deselectAll.
+	self removeDiagramElement.
 	self diagramController removeController: self.
 	self model: nil.
 	self diagramController: nil
@@ -227,8 +246,19 @@ OPController >> removeDependentControllers [
 ]
 
 { #category : #destruction }
+OPController >> removeDiagramElement [
+
+	self diagramElement ifNotNil: #removeRender.
+	diagramElement := nil
+]
+
+{ #category : #destruction }
 OPController >> removeFigure [
 
+	self
+		deprecated: 'Use #removeDiagramElement instead'
+		transformWith:
+		'`@receiver removeFigure' -> '`@receiver removeDiagramElement'.
 	self diagramController deselectAll.
 	self figure remove
 ]
@@ -254,6 +284,12 @@ OPController >> removeModelElement: aModelElement [
 ]
 
 { #category : #figures }
+OPController >> roassalShape [
+
+	^ self diagramElement roassalShape
+]
+
+{ #category : #figures }
 OPController >> saveStateOnDragEndFor: aFigure [
 	aFigure when: TRMouseDragEnd do: [ :evt | self diagramController saveState ]
 ]
@@ -262,14 +298,14 @@ OPController >> saveStateOnDragEndFor: aFigure [
 OPController >> showAcceptFeedbackFor: aController [
 	"Return something that understands #remove, or nil to not show any feedback."
 
-	^ OPRSAcceptDenyFeedbackBuilder acceptFeedbackFor: self figure
+	^ OPRSAcceptDenyFeedbackBuilder acceptFeedbackFor: self roassalShape
 ]
 
 { #category : #'canvas actions' }
 OPController >> showDenyFeedbackFor: aController [
 	"Return something that understands #remove, or nil to not show any feedback."
 
-	^ OPRSAcceptDenyFeedbackBuilder denyFeedbackFor: self figure
+	^ OPRSAcceptDenyFeedbackBuilder denyFeedbackFor: self roassalShape
 ]
 
 { #category : #construction }
@@ -280,7 +316,8 @@ OPController >> showInDiagram: aDiagramController [
 
 { #category : #'canvas actions' }
 OPController >> showSelectionFeedback [
+
 	"by default do nothing"
 
-	
+	self deprecated: 'Should be moved to DI'
 ]

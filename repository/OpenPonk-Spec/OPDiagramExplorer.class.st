@@ -116,6 +116,5 @@ OPDiagramExplorer >> showElements: aCollectionOfModelObjects [
 			          on: a
 			          in: diagramController model ]) collect: [ :each | 
 		         diagramController showWithoutDependentInDiagramModel: each ].
-	diagramController enableRefresh.
-	ctrls \ existingCtrls do: #refreshFigure
+	diagramController enableRefresh
 ]
