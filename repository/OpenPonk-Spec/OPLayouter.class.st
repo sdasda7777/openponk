@@ -58,7 +58,7 @@ OPLayouter >> basicApplyLayout: aTwoArgBlock [
 		                 selectedElements.
 	isPartialLayout := selectedBoxes size > 1.
 	allNodes := self allNodes.
-	nodes := RTGroup withAll: (isPartialLayout
+	nodes := RSGroup withAll: (isPartialLayout
 			          ifTrue: [ allNodes intersection: selectedBoxes ]
 			          ifFalse: [ allNodes ]).
 	allEdges := self allEdges reject: [ :each | 

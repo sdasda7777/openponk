@@ -177,8 +177,8 @@ OPWorkbench >> focusEditorOf: aDiagram [
 	aDiagram isSelected: true.
 	self announce: (OPEditorFocused on: focusedEditor).
 	topToolbar activeEditor: focusedEditor.
-	focusedEditor diagramController diagram: aDiagram.
-	self currentWorld defer: [ focusedEditor diagramController rebuild ]
+	focusedEditor diagramController diagramElement: aDiagram.
+	focusedEditor diagramController showElements
 ]
 
 { #category : #accessing }
@@ -233,7 +233,7 @@ OPWorkbench >> openEditorOnDiagram: aDiagram [
 	| editor notebookPage plugin model |
 	(self projectController hasDiagram: aDiagram) ifTrue: [ 
 		^ self focusEditorOf: aDiagram ].
-	model := aDiagram model.
+	model := aDiagram modelElement.
 	plugin := pluginRegistry pluginFor: model.
 	editor := OPEditor on: plugin.
 	editor workbench: self.

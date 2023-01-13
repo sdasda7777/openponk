@@ -238,7 +238,7 @@ OPProjectController >> openDiagrams [
 	selected := project diagrams
 		            detect: [ :each | each isOpen & each isSelected ]
 		            ifNone: [ nil ].
-	(project diagrams sorted: #order ascending)
+	project diagrams
 		select: #isOpen
 		thenDo: [ :each | workbench openEditorOnDiagram: each ].
 	selected ifNotNil: [ workbench openEditorOnDiagram: selected ].

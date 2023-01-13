@@ -24,13 +24,21 @@ OPDIDiagram >> documentation: anObject [
 { #category : #accessing }
 OPDIDiagram >> name [
 
-	^ name
+	^ name ifNil: [ self modelElement name ]
 ]
 
 { #category : #accessing }
 OPDIDiagram >> name: anObject [
 
 	name := anObject
+]
+
+{ #category : #rendering }
+OPDIDiagram >> render [
+
+	"there is currently no way to render a diagram directly (only update existing Roassal canvas)"
+
+	^ self notYetImplemented
 ]
 
 { #category : #accessing }
@@ -43,4 +51,20 @@ OPDIDiagram >> resolution [
 OPDIDiagram >> resolution: anObject [
 
 	resolution := anObject
+]
+
+{ #category : #'as yet unclassified' }
+OPDIDiagram >> updateFromRender [
+
+	self bounds: (OPDIBounds
+			 withPosition: 0 @ 0
+			 extent: roassalShape encompassingRectangle extent)
+]
+
+{ #category : #'as yet unclassified' }
+OPDIDiagram >> updateRenderFromSelf [
+
+	"do nothing (canvases are infinite in OP)"
+
+	
 ]

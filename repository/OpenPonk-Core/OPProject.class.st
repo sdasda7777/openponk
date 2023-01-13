@@ -38,7 +38,7 @@ OPProject >> = anotherProject [
 { #category : #accessing }
 OPProject >> addDiagram: aDiagram [
 
-	(self addModel: aDiagram model) add: aDiagram
+	(self addModel: aDiagram modelElement) add: aDiagram
 ]
 
 { #category : #accessing }
@@ -106,11 +106,11 @@ OPProject >> diagramsOf: aModel [
 
 { #category : #adding }
 OPProject >> ensureModelsHaveDiagrams [
-	self
-		addDiagrams:
-			(self models
-				reject: [ :eachModel | self hasDiagramsModel: eachModel ]
-				thenCollect: [ :eachModel | OPDiagram withWholeModel: eachModel ])
+
+	self addDiagrams: (self models
+			 reject: [ :eachModel | self hasDiagramsModel: eachModel ]
+			 thenCollect: [ :eachModel | 
+			 OPDIOpenPonkDiagram forModelElement: eachModel ])
 ]
 
 { #category : #adding }

@@ -15,6 +15,14 @@ Class {
 	#category : #'OpenPonk-Core-DiagramInterchange'
 }
 
+{ #category : #rendering }
+OPDIDiagramElement class >> forModelElement: anObject [
+
+	^ self new
+		  modelElement: anObject;
+		  yourself
+]
+
 { #category : #testing }
 OPDIDiagramElement class >> isAbstract [
 	^ self = OPDIDiagramElement
@@ -51,6 +59,12 @@ OPDIDiagramElement >> initialize [
 		               on: self
 		               slot: #targetEdges
 		               oppositeSlot: #target
+]
+
+{ #category : #rendering }
+OPDIDiagramElement >> isRendered [
+
+	^ roassalShape isNotNil and: [ roassalShape isInACanvas ]
 ]
 
 { #category : #testing }
@@ -144,7 +158,10 @@ OPDIDiagramElement >> remove [
 { #category : #removing }
 OPDIDiagramElement >> removeRender [
 
-	roassalShape remove
+	self ownedElements do: #removeRender.
+	roassalShape ifNil: [ ^ self ].
+	roassalShape remove.
+	roassalShape := nil
 ]
 
 { #category : #rendering }
@@ -156,10 +173,16 @@ OPDIDiagramElement >> render [
 { #category : #rendering }
 OPDIDiagramElement >> renderIn: aCanvas [
 
+	self isRendered ifTrue: [ 
+		canvas = aCanvas ifFalse: [ 
+			self error:
+				'Reusing same diagram element for 2 canvases not allowed' ].
+		^ self ].
 	canvas := aCanvas.
 	self render.
 	self updateRenderFromModel.
 	self updateRenderFromSelf.
+	self ownedElements do: [ :each | each renderIn: aCanvas ].
 	^ roassalShape
 ]
 
@@ -213,17 +236,17 @@ OPDIDiagramElement >> targetEdges: aCollection [
 { #category : #'as yet unclassified' }
 OPDIDiagramElement >> updateFromRender [
 
-	"do nothing here"
+	self ownedElements do: #updateFromRender
 ]
 
 { #category : #rendering }
 OPDIDiagramElement >> updateRenderFromModel [
 
-	"do nothing by default"
+	self ownedElements do: #updateRenderFromModel
 ]
 
 { #category : #rendering }
 OPDIDiagramElement >> updateRenderFromSelf [
 
-	"do nothing by default"
+	self ownedElements do: #updateRenderFromSelf
 ]

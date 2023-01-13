@@ -74,22 +74,21 @@ OPMementoDirectorySerializer >> modelSerializer: aModelSerializer [
 ]
 
 { #category : #saving }
-OPMementoDirectorySerializer >> saveDiagram: aDiagram to: aFolder [
+OPMementoDirectorySerializer >> saveDiagram: aDiagram to: aFolder index: aNumber [
+
 	(aFolder
-		/
-		(aDiagram order asString , '-'
-		, (aDiagram name ifEmpty: [ 'diagram' ]))
-		, diagramSerializer formatName)
+	 / (aNumber asString , '-' , (aDiagram name ifEmpty: [ 'diagram' ]))
+	 , diagramSerializer formatName)
 		ensureDelete;
-		writeStreamDo:
-				[ :stream | stream nextPutAll: (diagramSerializer serializeDiagram: aDiagram) ]
+		writeStreamDo: [ :stream | 
+			stream nextPutAll: (diagramSerializer serializeDiagram: aDiagram) ]
 ]
 
 { #category : #saving }
 OPMementoDirectorySerializer >> saveDiagramsOf: aMemento to: aFolder [
 	aMemento diagrams ifEmpty: [ ^ self ].
 	aFolder ensureCreateDirectory.
-	aMemento diagrams do: [ :each | self saveDiagram: each to: aFolder ]
+	aMemento diagrams withIndexDo: [ :each :index | self saveDiagram: each to: aFolder index: index ]
 ]
 
 { #category : #saving }

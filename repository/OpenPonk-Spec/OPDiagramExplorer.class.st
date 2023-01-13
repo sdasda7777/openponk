@@ -72,7 +72,7 @@ OPDiagramExplorer >> setDiagramController: aDiagramController [
 
 { #category : #actions }
 OPDiagramExplorer >> showAllElements [
-	diagramController rebuild
+	diagramController showInDiagram: diagramController model
 ]
 
 { #category : #actions }

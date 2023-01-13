@@ -14,7 +14,6 @@ Class {
 		'figureToControllerCache',
 		'modelToControllerCache',
 		'workbenchAnnouncer',
-		'diagram',
 		'layouter',
 		'figuresBeingAdded',
 		'controllerFactory',
@@ -150,44 +149,47 @@ OPDiagramController >> autosaveManager [
 
 { #category : #'controllers management' }
 OPDiagramController >> cachedControllerForModel: aModel [
-	^ self
-		cachedControllerForModel: aModel
-		ifNone: [ self controllers
-				errorNotFound: 'Controller for ' , aModel printString ]
+
+	^ self cachedControllerForModel: aModel ifNone: [ 
+		  self controllers errorNotFound:
+			  'Controller for ' , aModel printString ]
 ]
 
 { #category : #'controllers management' }
 OPDiagramController >> cachedControllerForModel: aModel ifFound: aFoundBlock [
+
+	^ self
+		  cachedControllerForModel: aModel
+		  ifFound: aFoundBlock
+		  ifNone: [ nil ]
+]
+
+{ #category : #'controllers management' }
+OPDiagramController >> cachedControllerForModel: aModel ifFound: aFoundBlock ifNone: aNoneBlock [
+
 	| ctrl |
-	modelToControllerCache
-		ifNil: [ modelToControllerCache := Dictionary new.
-			self controllers
-				do: [ :each | modelToControllerCache at: each model put: each ] ].
+	modelToControllerCache ifNil: [ 
+		modelToControllerCache := Dictionary new.
+		self controllers do: [ :each | 
+			modelToControllerCache at: each model put: each ] ].
 	ctrl := modelToControllerCache at: aModel ifPresent: #yourself.
-	(self controllers includes: ctrl)
-		ifTrue: [ ^ aFoundBlock value: ctrl ].
-	self controllers
-		detect: [ :fresh | fresh model = aModel ]
-		ifFound: [ :found | 
-			modelToControllerCache at: aModel put: found.
-			aFoundBlock value: found ]
+	(self controllers includes: ctrl) ifTrue: [ 
+		^ aFoundBlock value: ctrl ].
+	^ self controllers
+		  detect: [ :fresh | fresh model = aModel ]
+		  ifFound: [ :found | 
+			  modelToControllerCache at: aModel put: found.
+			  aFoundBlock cull: found ]
+		  ifNone: aNoneBlock
 ]
 
 { #category : #'controllers management' }
 OPDiagramController >> cachedControllerForModel: aModel ifNone: aNoneBlock [
-	| ctrl |
-	modelToControllerCache
-		ifNil: [ modelToControllerCache := Dictionary new.
-			self controllers
-				do: [ :each | modelToControllerCache at: each model put: each ] ].
-	ctrl := modelToControllerCache at: aModel ifPresent: #yourself.
-	(self controllers includes: ctrl)
-		ifTrue: [ ^ ctrl ].
-	ctrl := self controllers
-		detect: [ :fresh | fresh model = aModel ]
-		ifNone: [ ^ aNoneBlock value ].
-	modelToControllerCache at: aModel put: ctrl.
-	^ ctrl
+
+	^ self
+		  cachedControllerForModel: aModel
+		  ifFound: [ :ctrl | ctrl ]
+		  ifNone: aNoneBlock
 ]
 
 { #category : #'controllers management' }
@@ -278,22 +280,32 @@ OPDiagramController >> controllerFactory [
 
 { #category : #'controllers management' }
 OPDiagramController >> controllerForModel: aModel [
-	aModel = model
-		ifTrue: [ ^ self ].
+
+	aModel = model ifTrue: [ ^ self ].
 	^ self cachedControllerForModel: aModel
 ]
 
 { #category : #'controllers management' }
 OPDiagramController >> controllerForModel: aModel ifFound: aFoundBlock [
-	aModel = model
-		ifTrue: [ ^ aFoundBlock value: self ].
+
+	aModel = model ifTrue: [ ^ aFoundBlock value: self ].
 	^ self cachedControllerForModel: aModel ifFound: aFoundBlock
 ]
 
 { #category : #'controllers management' }
+OPDiagramController >> controllerForModel: aModel ifFound: aFoundBlock ifNone: aNoneBlock [
+
+	aModel = model ifTrue: [ ^ aFoundBlock value: self ].
+	^ self
+		  cachedControllerForModel: aModel
+		  ifFound: aFoundBlock
+		  ifNone: aNoneBlock
+]
+
+{ #category : #'controllers management' }
 OPDiagramController >> controllerForModel: aModel ifNone: aFoundBlock [
-	aModel = model
-		ifTrue: [ ^ self ].
+
+	aModel = model ifTrue: [ ^ self ].
 	^ self cachedControllerForModel: aModel ifNone: aFoundBlock
 ]
 
@@ -348,12 +360,21 @@ OPDiagramController >> deselectAll [
 
 { #category : #accessing }
 OPDiagramController >> diagram [
-	^ diagram
+
+	self
+		deprecated: 'Use diagramElement instead'
+		transformWith: '`@receiver diagram ' -> '`@receiver diagramElement '.
+	^ self diagramElement
 ]
 
 { #category : #accessing }
 OPDiagramController >> diagram: aDiagram [
-	diagram := aDiagram
+
+	self
+		deprecated: 'Use diagram: instead'
+		transformWith: '`@receiver diagram: `@statements1'
+			-> '`@receiver diagramElement: `@statements1'.
+	^ self diagramElement: aDiagram
 ]
 
 { #category : #accessing }
@@ -626,18 +647,12 @@ OPDiagramController >> rebuild [
 	controllers := nil.
 	[ :job | 
 	job title: 'Preparing diagram'.
-	diagram ifNil: [ 
-		^ self
-			  diagram: (OPDiagram withWholeModel: model);
-			  rebuild ].
-	self cleanCanvas.
-	diagram camera ifNotNil: [ :camera | 
-		self canvas camera
-			translateTo: camera offset;
-			scale: camera zoom ].
-	self addCommonElementsFromDiagram.
+	 diagramElement ifNil: [ 
+		 diagramElement:= (OPDIOpenPonkDiagram forModelElement: model). ].
+	diagramElement removeRender.
+	diagramElement renderIn: self canvas.
 	self showElements.
-	diagram layout
+	diagramElement layout
 		ifNil: [ self applyDefaultLayout ]
 		ifNotNil: [ :layout | self layout: layout ] ] asJob run
 ]
@@ -773,10 +788,31 @@ OPDiagramController >> showAllElements [
 ]
 
 { #category : #rebuilding }
+OPDiagramController >> showDiagramElement: aDiagramElement [
+
+	| controller |
+	controller := self
+		              controllerForModel: aDiagramElement modelElement
+		              ifFound: [ :ctrl | 
+			              ctrl isRendered ifTrue: [ 
+				              aDiagramElement isRendered ifTrue: [ ^ ctrl ].
+				              ^ self error: 'Controller is already rendered' ].
+			              ctrl ]
+		              ifNone: [ 
+		              self newControllerFor: aDiagramElement modelElement ].
+	controller
+		diagramElement: aDiagramElement;
+		showWithoutDependentInDiagram: self.
+	aDiagramElement ownedElements do: [ :each | 
+		self showDiagramElement: each ].
+	^ controller
+]
+
+{ #category : #rebuilding }
 OPDiagramController >> showElements [
 
-	self visibleElements:
-		(diagram visibleElementsOrIfNotSet: [ self allShowableElements ])
+	diagramElement ownedElements do: [ :each | 
+		self showDiagramElement: each ]
 ]
 
 { #category : #figures }

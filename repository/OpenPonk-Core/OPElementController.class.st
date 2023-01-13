@@ -139,7 +139,11 @@ OPElementController >> remove [
 OPElementController >> render [
 
 	self diagramController addingFigureFor: self.
-	diagramElement := self diagramElementClass renderForController: self.
+	diagramElement
+		ifNil: [ 
+			diagramElement := self diagramElementClass renderForController:
+				                  self ]
+		ifNotNil: [ diagramElement renderIn: self diagramController canvas ].
 	^ self diagramController addedFigureFor: self
 ]
 

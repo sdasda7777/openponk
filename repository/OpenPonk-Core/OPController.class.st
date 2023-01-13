@@ -115,6 +115,12 @@ OPController >> diagramElement [
 ]
 
 { #category : #accessing }
+OPController >> diagramElement: aDiagramElement [
+
+	diagramElement := aDiagramElement
+]
+
+{ #category : #accessing }
 OPController >> elementsToShowInside [
 	^ #()
 ]

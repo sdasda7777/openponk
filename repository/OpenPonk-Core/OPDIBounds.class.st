@@ -11,6 +11,15 @@ Class {
 }
 
 { #category : #'instance creation' }
+OPDIBounds class >> withEncompassingRectangle: aRectangle [
+
+	^ self new
+		  extent: aRectangle extent;
+		  origin: aRectangle origin;
+		  yourself
+]
+
+{ #category : #'instance creation' }
 OPDIBounds class >> withPosition: aPositionPoint extent: anExtentPoint [
 
 	^ self new
