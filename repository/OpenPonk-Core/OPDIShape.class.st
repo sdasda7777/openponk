@@ -66,7 +66,8 @@ OPDIShape >> updateFromRender [
 
 	self bounds: (OPDIBounds
 			 withPosition: roassalShape position
-			 extent: roassalShape extent)
+			 extent: roassalShape extent).
+	super updateFromRender
 ]
 
 { #category : #roassal }

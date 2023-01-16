@@ -299,6 +299,20 @@ OPWorkbench >> projectTree [
 	^ projectTree
 ]
 
+{ #category : #'as yet unclassified' }
+OPWorkbench >> showAllElementsInAllDiagrams [
+
+	self projectController controllers do: [ :each | 
+		each
+			showAllElements;
+			applyDefaultLayout.
+		each canvas extent max <= 500 ifTrue: [ 
+			each canvasPresenter whenExtentChangedDo: [ :evt | 
+				each zoomToFit.
+				each canvasPresenter whenExtentChangedDo: [ :event |  ] ] ] ].
+	self projectController controllers do: #zoomToFit
+]
+
 { #category : #protocol }
 OPWorkbench >> title [
 

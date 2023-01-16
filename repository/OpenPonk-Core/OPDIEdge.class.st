@@ -116,7 +116,8 @@ OPDIEdge >> to [
 { #category : #'as yet unclassified' }
 OPDIEdge >> updateFromRender [
 
-	self waypoints: roassalShape controlPoints
+	self waypoints: roassalShape controlPoints.
+	super updateFromRender
 ]
 
 { #category : #'as yet unclassified' }

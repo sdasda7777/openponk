@@ -58,7 +58,8 @@ OPDIDiagram >> updateFromRender [
 
 	self bounds: (OPDIBounds
 			 withPosition: 0 @ 0
-			 extent: roassalShape encompassingRectangle extent)
+			 extent: roassalShape encompassingRectangle extent).
+	self ownedElements do: #updateFromRender
 ]
 
 { #category : #'as yet unclassified' }

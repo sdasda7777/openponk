@@ -6,7 +6,8 @@ Class {
 	#superclass : #SpRoassalPresenter,
 	#instVars : [
 		'diagramController',
-		'onZoomChange'
+		'onZoomChange',
+		'onExtentChange'
 	],
 	#category : #'OpenPonk-Spec-Windows'
 }
@@ -261,7 +262,8 @@ OPCanvasPresenter >> ifFileNameNotCompatible: aFileReference do: aBlock [
 OPCanvasPresenter >> initialize [
 
 	super initialize.
-	onZoomChange := [ :value |  ].
+	onZoomChange := [ :event |  ].
+	onExtentChange := [ :event |  ].
 	self script: [ :canvas | self initializeCanvas: canvas ]
 ]
 
@@ -284,51 +286,21 @@ OPCanvasPresenter >> initializeCanvas: aCanvas [
 			self
 				selectedShapes: evt selectedShapes
 				onPosition: evt originalEvent position ].
-
-	labelMousePos := RSLabel new
-		                 isFixed: true;
-		                 translateTo: 400 @ 10;
-		                 yourself.
-	labelMousePosCam := RSLabel new
-		                    isFixed: true;
-		                    translateTo: 400 @ 30;
-		                    yourself.
-	labelScale := RSLabel new
-		              isFixed: true;
-		              translateTo: 400 @ 50;
-		              yourself.
-	labelCamPos := RSLabel new
-		               isFixed: true;
-		               translateTo: 400 @ 70;
-		               yourself.
-	labelLastClick := RSLabel new
-		                  isFixed: true;
-		                  translateTo: 400 @ 90;
-		                  yourself.
-	aCanvas
-		add: labelMousePos;
-		add: labelMousePosCam;
-		add: labelScale;
-		add: labelCamPos;
-		add: labelLastClick.
-	aCanvas when: RSAbstractMouseEvent do: [ :e | 
-		labelMousePos text: 'mouse pos: ' , e position asString.
-		labelMousePosCam text:
-			'mouse posFromCam: ' , e positionFromCamera asString.
-		labelScale text: 'scale: ' , aCanvas camera scale asString.
-		labelCamPos text: 'cam position: ' , aCanvas position asString.
-		aCanvas signalUpdate ].
-
 	self flag: #TODO_R3.
 	"aCanvas @ (RTGridView new gridSize: 20)."
-	^ aCanvas when: RSScaleChangedEvent do: [ :event | 
-		  | zoomText |
-		  zoomText := (event newScale < 1
-			               ifTrue: [ '   ' ]
-			               ifFalse: [ '' ])
-		              , (event newScale * 100) rounded asString , '%'.
-		  onZoomChange value: zoomText.
-		  self editor zoomLabel label: ' ' , zoomText ]
+
+
+	aCanvas
+		when: RSExtentChangedEvent
+		do: [ :event | onExtentChange value: event ].
+	aCanvas when: RSScaleChangedEvent do: [ :event | 
+		| zoomText |
+		zoomText := (event newScale < 1
+			             ifTrue: [ '   ' ]
+			             ifFalse: [ '' ])
+		            , (event newScale * 100) rounded asString , '%'.
+		onZoomChange value: event.
+		self editor zoomLabel label: ' ' , zoomText ]
 ]
 
 { #category : #events }
@@ -383,17 +355,14 @@ OPCanvasPresenter >> selectedShapes: shapes onPosition: aPoint [
 	self diagramController selectedShapes: shapes onPosition: aPoint
 ]
 
-{ #category : #'as yet unclassified' }
-OPCanvasPresenter >> showAllFigures [
-
-	self canvas shapes
-		ifEmpty: [ self canvas camera scale: 1 ]
-		ifNotEmpty: [ self canvas zoomToFit ]
-]
-
 { #category : #signalling }
 OPCanvasPresenter >> signalUpdate [
 	self canvas signalUpdate
+]
+
+{ #category : #accessing }
+OPCanvasPresenter >> whenExtentChangedDo:  aOneArgBlock [
+	onExtentChange := aOneArgBlock
 ]
 
 { #category : #accessing }
@@ -423,4 +392,12 @@ OPCanvasPresenter >> zoom: aScale [
 		ifFalse: [ ^ self ].
 	self canvas camera scale: aScale.
 	self canvas signalUpdate
+]
+
+{ #category : #'as yet unclassified' }
+OPCanvasPresenter >> zoomToFit [
+
+	self canvas shapes
+		ifEmpty: [ self canvas camera scale: 1 ]
+		ifNotEmpty: [ self canvas zoomToFit ]
 ]

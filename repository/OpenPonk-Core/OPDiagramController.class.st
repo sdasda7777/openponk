@@ -245,7 +245,8 @@ OPDiagramController >> canvasPresenter [
 OPDiagramController >> canvasPresenter: aCanvasPresenter [
 
 	canvasPresenter := aCanvasPresenter.
-	self addMouseEventsFor: canvasPresenter canvas
+	self addMouseEventsFor: canvasPresenter canvas.
+	diagramElement canvas: canvasPresenter canvas
 ]
 
 { #category : #rebuilding }
@@ -647,8 +648,8 @@ OPDiagramController >> rebuild [
 	controllers := nil.
 	[ :job | 
 	job title: 'Preparing diagram'.
-	 diagramElement ifNil: [ 
-		 diagramElement:= (OPDIOpenPonkDiagram forModelElement: model). ].
+	diagramElement ifNil: [ 
+		diagramElement := OPDIOpenPonkDiagram forModelElement: model ].
 	diagramElement removeRender.
 	diagramElement renderIn: self canvas.
 	self showElements.
@@ -915,4 +916,10 @@ OPDiagramController >> workbenchAnnouncer [
 { #category : #accessing }
 OPDiagramController >> workbenchAnnouncer: anObject [
 	workbenchAnnouncer := anObject
+]
+
+{ #category : #zoom }
+OPDiagramController >> zoomToFit [
+
+	self canvasPresenter zoomToFit
 ]

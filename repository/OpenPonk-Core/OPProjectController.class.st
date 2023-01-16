@@ -194,7 +194,9 @@ OPProjectController >> mergeModelsAndDiagramsIntoOne [
 			self project diagrams do: [ :eachDiagram | 
 					workbench closeEditorOfDiagram: eachDiagram ].
 			models do: [ :eachModel | self removeModel: eachModel ].
-			diagram := OPDiagram withWholeModel: model.
+			diagram := OPDIOpenPonkDiagram forModelElement: model.
+			diagram ownedElements:
+					(self project diagrams flatCollect: #ownedElements).
 			self project addDiagram: diagram.
 			layouter := (self openEditorOnDiagram: diagram) diagramController
 				            layouter.
@@ -410,10 +412,7 @@ OPProjectController >> updateDiagrams [
 			detect: [ :ctrl | ctrl diagram = eachDiagram ]
 			ifFound: [ :ctrl | 
 				eachDiagram isOpen: true.
-				eachDiagram layout: ctrl layout copy.
-				eachDiagram commonElements: ctrl commonElements.
-				eachDiagram visibleElements: ctrl visibleElements copy.
-				eachDiagram updateFromRoassalCanvas: ctrl canvas.
+				eachDiagram updateFromRender.
 				eachDiagram order: (controllers indexOf: ctrl).
 				eachDiagram isSelected: ctrl = focusedController ]
 			ifNone: [ 
