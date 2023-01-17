@@ -198,7 +198,7 @@ OPCanvasPresenter >> exportCanvasToSvg: aFileReference silently: aSilentlyBoolea
 	self diagramController deselectAll.
 
 	jobBlock := [ :job | 
-	            amountOfElements := self canvas elements size.
+	            amountOfElements := self canvas nodes size.
 	            job title:
 		            'Exporting diagram - might take '
 		            , (amountOfElements > 5000
@@ -209,7 +209,7 @@ OPCanvasPresenter >> exportCanvasToSvg: aFileReference silently: aSilentlyBoolea
 						             ifFalse: [ 'a few seconds' ] ]).
 
 	            self canvas svgExporter
-		            filename: aFileReference;
+		            fileName: aFileReference pathString;
 		            export ].
 
 	aSilentlyBoolean ifTrue: [ ^ jobBlock value: Job new ].
