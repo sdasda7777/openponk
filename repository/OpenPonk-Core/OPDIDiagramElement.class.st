@@ -78,6 +78,7 @@ OPDIDiagramElement >> fromSton: stonReader [
 OPDIDiagramElement >> initialize [
 
 	super initialize.
+	modelElements := #(  ).
 	ownedElements := SRToManyLink
 		                 on: self
 		                 slot: #ownedElements
@@ -134,7 +135,7 @@ OPDIDiagramElement >> modelElement [
 { #category : #accessing }
 OPDIDiagramElement >> modelElement: anObject [
 
-	anObject ifNil: [ ^ self modelElements: {  } ].
+	anObject ifNil: [ ^ self modelElements: #(  ) ].
 	self modelElements: { anObject }
 ]
 
@@ -147,7 +148,6 @@ OPDIDiagramElement >> modelElements [
 { #category : #accessing }
 OPDIDiagramElement >> modelElements: aCollection [
 
-	self haltIf: (aCollection anySatisfy: [ :any | any isNil ]).
 	modelElements := aCollection
 ]
 

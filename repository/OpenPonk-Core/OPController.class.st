@@ -177,8 +177,9 @@ OPController >> model [
 { #category : #accessing }
 OPController >> model: aModel [
 
-	aModel uuid ifNil: [ 
-		self error: 'All model objects must have a uuid to be used by OP' ].
+	aModel ifNotNil: [ 
+		aModel uuid ifNil: [ 
+			self error: 'All model objects must have a uuid to be used by OP' ] ].
 	model ifNotNil: [ :m | self internalUnsubscribeFrom: m ].
 	model := aModel.
 	model ifNotNil: [ :m | self internalSubscribeTo: m ]
