@@ -134,7 +134,6 @@ OPProject >> hash [
 { #category : #initialization }
 OPProject >> initialize [
 
-	uuid := UUID new.
 	modelsAndDiagrams := Dictionary new asValueHolder.
 	name := NewValueHolder value: 'Unnamed project'.
 	dirty := false asValueHolder.
@@ -253,7 +252,8 @@ OPProject >> unsubscribe: aSubscriber [
 
 { #category : #accessing }
 OPProject >> uuid [
-	^ uuid ifNil: [ ^ UUID new ]
+
+	^ uuid ifNil: [ uuid := UUID new ]
 ]
 
 { #category : #accessing }

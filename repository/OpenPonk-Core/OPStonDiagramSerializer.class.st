@@ -22,12 +22,8 @@ OPStonDiagramSerializer >> materializeDiagramOf: aModel from: aStream [
 	^ diagram
 ]
 
-{ #category : #'ston - serialize/materialize' }
-OPStonDiagramSerializer >> serialize: anObject [
-	^ STON toStringPretty: anObject
-]
-
 { #category : #'serialize/materialize' }
-OPStonDiagramSerializer >> serializeDiagram: aDiagramMemento [
-	^ self serialize: aDiagramMemento
+OPStonDiagramSerializer >> serializeDiagram: aDiagram to: aStream [
+
+	^ STON put: aDiagram onStreamPretty: aStream
 ]
