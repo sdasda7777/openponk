@@ -79,13 +79,7 @@ OPCanvasPresenter >> exportAsPng [
 	self flag: 'default name not supported in file browser'.
 	OPExportImageDialog new
 		title: 'Choose a PNG file to export the diagram';
-		okAction: [ :file :zoom | 
-			| acceptFile |
-			acceptFile := true.
-			self ifFileNameNotCompatible: file do: [ acceptFile := false ].
-			acceptFile
-				ifTrue: [ self exportCanvasToPng: file zoom: zoom ]
-				ifFalse: [ self exportAsPng ] ];
+		okAction: [ :file :zoom | self exportCanvasToPng: file zoom: zoom ];
 		extensions: #( png ) named: 'PNG images';
 		open
 ]
@@ -128,14 +122,13 @@ OPCanvasPresenter >> exportCanvasToPng: aFileReference zoom: aNumber [
 OPCanvasPresenter >> exportCanvasToPng: aFileReference zoom: aNumber silently: aSilentlyBoolean [
 
 	| gridShape originalGridColor originalZoom zoom approxResolution jobBlock |
-	self ifFileNameNotCompatible: aFileReference do: [ ^ self ].
 	approxResolution := aNumber * aNumber
 	                    * self canvas encompassingRectangle area.
 	zoom := (aNumber squared * self canvas encompassingRectangle area
 	         > 500000000
 		         ifTrue: [ 
-			         (500000000 / self canvas encompassingRectangle area)
-				         sqrt roundDownTo: 0.01 ]
+			         (500000000 / self canvas encompassingRectangle area) sqrt 
+				         roundDownTo: 0.01 ]
 		         ifFalse: [ aNumber ]) max: 0.01.
 
 	(aSilentlyBoolean not and: [ (aNumber - zoom) abs > 0.011 ]) ifTrue: [ 
@@ -170,7 +163,7 @@ OPCanvasPresenter >> exportCanvasToPng: aFileReference zoom: aNumber silently: a
 	            gridShape color: Color transparent.
 	            self canvas camera scale: zoom.
 
-	            self canvas pngExporter 
+	            self canvas pngExporter
 		            fileName: aFileReference pathString;
 		            export ] ensure: [ 
 		            job progress: 0.8.
@@ -230,32 +223,6 @@ OPCanvasPresenter >> exportCanvasToSvg: aFileReference silently: aSilentlyBoolea
 					 cr.
 				 s << 'Click to open location' ])
 		actionOnClick: [ aFileReference openInOSFileBrowser ]
-]
-
-{ #category : #toolbar }
-OPCanvasPresenter >> ifFileNameNotCompatible: aFileReference do: aBlock [
-
-	| placesWithNonAscii |
-	Smalltalk platform isWindows ifFalse: [ ^ self ].
-	placesWithNonAscii := OrderedCollection new.
-	aFileReference basename isAsciiString ifFalse: [ 
-		placesWithNonAscii add: 'file name' ].
-	aFileReference parent absolutePath pathString isAsciiString ifFalse: [ 
-		placesWithNonAscii add: 'file path' ].
-	placesWithNonAscii ifEmpty: [ ^ self ].
-	(GrowlMorph
-		 label: (String streamContents: [ :s | 
-					  s << 'PNG exporter error: Non-ASCII characters in '.
-					  placesWithNonAscii asStringOn: s delimiter: ' and ' ])
-		 contents: (String streamContents: [ :s | 
-					  s
-					  <<
-						  'Due to a bug, PNG exporter does not support non-ASCII characters anywhere in file paths. Please export the image to a different '.
-					  placesWithNonAscii asStringOn: s delimiter: ' and ' ]))
-		vanishDelay: 15 seconds;
-		backgroundColor: GrowlMorph theme dangerBackgroundColor;
-		openInWorld.
-	aBlock value
 ]
 
 { #category : #initialization }
