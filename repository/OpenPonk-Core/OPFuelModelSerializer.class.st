@@ -4,6 +4,12 @@ Class {
 	#category : #'OpenPonk-Core-Persistence'
 }
 
+{ #category : #testing }
+OPFuelModelSerializer class >> isDeprecated [
+
+	^ true
+]
+
 { #category : #formatting }
 OPFuelModelSerializer >> formatName [
 	^ 'fuel'

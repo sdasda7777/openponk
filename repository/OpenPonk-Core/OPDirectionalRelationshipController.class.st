@@ -13,6 +13,15 @@ Class {
 	#category : #'OpenPonk-Core-Controllers'
 }
 
+{ #category : #figures }
+OPDirectionalRelationshipController >> createDiagramElement [
+
+	super createDiagramElement.
+	self diagramElement
+		source: self source diagramElement;
+		target: self target diagramElement
+]
+
 { #category : #hooks }
 OPDirectionalRelationshipController >> createLineFrom: fromElement to: toElement [
 

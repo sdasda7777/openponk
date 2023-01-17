@@ -108,7 +108,8 @@ OPProjectController >> enabledPlugins [
 
 { #category : #testing }
 OPProjectController >> hasDiagram: aDiagram [
-	^ controllers anySatisfy: [ :each | each diagram = aDiagram ]
+
+	^ controllers anySatisfy: [ :each | each diagramElement = aDiagram ]
 ]
 
 { #category : #adding }
@@ -218,7 +219,7 @@ OPProjectController >> modelMementoFor: aModel [
 
 	^ OPPersistenceMemento model: aModel diagrams: (controllers
 			   select: [ :each | each model = aModel ]
-			   thenCollect: [ :each | each diagram ])
+			   thenCollect: [ :each | each diagramElement ])
 ]
 
 { #category : #saving }
@@ -409,16 +410,14 @@ OPProjectController >> updateDiagrams [
 		                     editor diagramController ].
 	self project diagrams do: [ :eachDiagram | 
 		controllers
-			detect: [ :ctrl | ctrl diagram = eachDiagram ]
+			detect: [ :ctrl | ctrl diagramElement = eachDiagram ]
 			ifFound: [ :ctrl | 
 				eachDiagram isOpen: true.
 				eachDiagram updateFromRender.
-				eachDiagram order: (controllers indexOf: ctrl).
 				eachDiagram isSelected: ctrl = focusedController ]
 			ifNone: [ 
 				eachDiagram
 					isOpen: false;
-					order: -1;
 					isSelected: false ] ]
 ]
 

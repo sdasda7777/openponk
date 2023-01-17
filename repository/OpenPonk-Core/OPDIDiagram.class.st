@@ -33,8 +33,17 @@ OPDIDiagram >> name: anObject [
 	name := anObject
 ]
 
+{ #category : #'as yet unclassified' }
+OPDIDiagram >> ownedElementRenderedIn: aCanvas [
+
+	roassalShape ifNotNil: [ ^ self ].
+	super ownedElementRenderedIn: aCanvas.
+	roassalShape := aCanvas.
+	self updateRenderFromSelf
+]
+
 { #category : #rendering }
-OPDIDiagram >> render [
+OPDIDiagram >> renderBasicShape [
 
 	"there is currently no way to render a diagram directly (only update existing Roassal canvas)"
 

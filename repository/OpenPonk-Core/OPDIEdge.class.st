@@ -27,7 +27,7 @@ OPDIEdge class >> renderSimplifiedForController: aController [
 		  modelElement: aController model;
 		  source: aController source diagramElement;
 		  target: aController target diagramElement;
-		  renderBasicIn: aController diagramController canvas;
+		  renderBasicShapeIn: aController diagramController canvas;
 		  yourself
 ]
 
@@ -41,33 +41,9 @@ OPDIEdge >> from [
 ]
 
 { #category : #rendering }
-OPDIEdge >> renderAdditions [
-
-	"do nothing by default"
-]
-
-{ #category : #rendering }
-OPDIEdge >> renderBasic [
+OPDIEdge >> renderBasicShape [
 
 	^ self subclassResponsibility
-]
-
-{ #category : #rendering }
-OPDIEdge >> renderBasicIn: aCanvas [
-
-	canvas := aCanvas.
-	self renderBasic.
-	^ roassalShape
-]
-
-{ #category : #rendering }
-OPDIEdge >> renderIn: aCanvas [
-
-	self renderBasicIn: aCanvas.
-	self renderAdditions.
-	self updateRenderFromModel.
-	self updateRenderFromSelf.
-	^ roassalShape
 ]
 
 { #category : #accessing }

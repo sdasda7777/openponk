@@ -40,6 +40,13 @@ OPDIOpenPonkDiagram >> isSelected: anObject [
 	isSelected := anObject
 ]
 
+{ #category : #removing }
+OPDIOpenPonkDiagram >> removeRender [
+
+	self ownedElements do: #removeRender.
+	roassalShape := nil
+]
+
 { #category : #'as yet unclassified' }
 OPDIOpenPonkDiagram >> updateFromRender [
 

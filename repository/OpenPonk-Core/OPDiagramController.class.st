@@ -245,8 +245,7 @@ OPDiagramController >> canvasPresenter [
 OPDiagramController >> canvasPresenter: aCanvasPresenter [
 
 	canvasPresenter := aCanvasPresenter.
-	self addMouseEventsFor: canvasPresenter canvas.
-	diagramElement canvas: canvasPresenter canvas
+	self addMouseEventsFor: canvasPresenter canvas
 ]
 
 { #category : #rebuilding }
@@ -645,6 +644,7 @@ OPDiagramController >> plugin [
 { #category : #rebuilding }
 OPDiagramController >> rebuild [
 
+	self deprecated: 'Might cause issues'.
 	controllers := nil.
 	[ :job | 
 	job title: 'Preparing diagram'.
@@ -780,12 +780,13 @@ OPDiagramController >> selectedShapes: shapes onPosition: aPoint [
 
 { #category : #rebuilding }
 OPDiagramController >> showAllElements [
+
 	self disableRefresh.
 	self showInDiagram: self.
 	self enableRefresh.
 	self controllers
 		select: [ :each | each isKindOf: OPController ]
-		thenDo: #refreshFigure
+		thenDo: [ :each | each diagramElement updateRenderFromModel ]
 ]
 
 { #category : #rebuilding }
@@ -813,7 +814,8 @@ OPDiagramController >> showDiagramElement: aDiagramElement [
 OPDiagramController >> showElements [
 
 	diagramElement ownedElements do: [ :each | 
-		self showDiagramElement: each ]
+		self showDiagramElement: each ].
+	diagramElement updateRenderFromSelf
 ]
 
 { #category : #figures }

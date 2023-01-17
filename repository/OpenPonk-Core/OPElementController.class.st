@@ -39,6 +39,14 @@ OPElementController >> attachTo: aDiagramController [
 	self attachFigure"
 ]
 
+{ #category : #construction }
+OPElementController >> createDiagramElement [
+
+	diagramElement := self diagramElementClass
+		                  in: self diagramElementOwner
+		                  forModelElement: self model
+]
+
 { #category : #deprecated }
 OPElementController >> createFigure [
 	self deprecated: 'Use renderFigureIn: instead.'.
@@ -61,6 +69,8 @@ OPElementController >> createModelIn: aParentModel [
 
 { #category : #construction }
 OPElementController >> createModelIn: aParentModel andShowInDiagram: aDiagramController [
+
+	self removeDiagramElement.
 	self createModelIn: aParentModel.
 	self showWithoutDependentInDiagram: aDiagramController
 ]
@@ -69,6 +79,20 @@ OPElementController >> createModelIn: aParentModel andShowInDiagram: aDiagramCon
 OPElementController >> diagramElementClass [
 
 	^ self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
+OPElementController >> diagramElementOwner [
+
+	^ self diagramController diagramElement
+]
+
+{ #category : #diagrams }
+OPElementController >> ensureToHaveDiagramElement [
+
+	diagramElement
+		ifNil: [ self createDiagramElement ]
+		ifNotNil: [ diagramElement modelElement: self model ]
 ]
 
 { #category : #figures }
@@ -136,14 +160,10 @@ OPElementController >> remove [
 ]
 
 { #category : #construction }
-OPElementController >> render [
+OPElementController >> renderDiagramElement [
 
 	self diagramController addingFigureFor: self.
-	diagramElement
-		ifNil: [ 
-			diagramElement := self diagramElementClass renderForController:
-				                  self ]
-		ifNotNil: [ diagramElement renderIn: self diagramController canvas ].
+	self diagramElement renderIn: self diagramController canvas.
 	^ self diagramController addedFigureFor: self
 ]
 
@@ -151,17 +171,20 @@ OPElementController >> render [
 OPElementController >> renderFigureIn: aCanvas [
 
 	self
-		deprecated: 'Use #render without parameter.'
-		transformWith:
-		'`@receiver renderFigureIn: `@statements1' -> '`@receiver render'.
-	^ self render
+		deprecated: 'Use #createDiagramElement and #renderDiagramElement without parameter.'
+		transformWith: '`@receiver renderFigureIn: `@statements1'
+			-> '`@receiver createDiagramElement; renderDiagramElement'.
+	^ self
+		  createDiagramElement;
+		  renderDiagramElement
 ]
 
 { #category : #construction }
 OPElementController >> showInDiagram: aDiagramController [
 
 	aDiagramController addController: self.
-	self render.
+	self ensureToHaveDiagramElement.
+	self renderDiagramElement.
 	self dependentElements do: [ :each | 
 		aDiagramController showInDiagramModel: each ]
 ]
@@ -175,7 +198,8 @@ OPElementController >> showSelectionFeedback [
 OPElementController >> showWithoutDependentInDiagram: aDiagramController [
 
 	aDiagramController addController: self.
-	self render
+	self ensureToHaveDiagramElement.
+	self renderDiagramElement
 ]
 
 { #category : #accessing }

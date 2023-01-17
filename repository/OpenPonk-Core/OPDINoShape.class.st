@@ -24,17 +24,17 @@ OPDINoShape >> removeRender [
 ]
 
 { #category : #rendering }
-OPDINoShape >> render [
+OPDINoShape >> renderBasicShape [
 
 	roassalShape := RSBox new
 		                color: Color transparent;
 		                borderColor: Color transparent;
 		                yourself.
 
-	moveSubscription := canvas
-		                    when: RSMouseMove
-		                    do: [ :event | 
-		                    roassalShape translateTo: event position ].
+	moveSubscription := canvas when: RSMouseMove do: [ :event | 
+		                    roassalShape
+			                    translateTo: event position;
+			                    signalUpdate ].
 
 	canvas add: roassalShape
 ]

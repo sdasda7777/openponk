@@ -162,8 +162,8 @@ OPWorkbench >> focusEditorOf: aDiagram [
 
 	| editorTabInfo |
 	(focusedEditor isNotNil and: [ 
-		 focusedEditor diagramController diagram = aDiagram ]) ifTrue: [ 
-		^ self ].
+		 focusedEditor diagramController diagramElement = aDiagram ]) 
+		ifTrue: [ ^ self ].
 	editorTabInfo := editors at: aDiagram.
 	notebook selectedPage = (editorTabInfo at: #page) ifFalse: [ 
 		^ notebook selectPage: (editorTabInfo at: #page) ].

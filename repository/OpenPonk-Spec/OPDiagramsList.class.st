@@ -170,7 +170,8 @@ OPDiagramsList >> initializeList [
 		displayIcon: [ :aView | self adapters iconFor: aView modelElement ];
 		whenActivatedDo: [ 
 			list selectedItem ifNotNil: [ :aView | self openDiagram: aView ] ];
-		whenSelectionChangedDo: [ :item | self selectionChanged: item ];
+		whenSelectionChangedDo: [ :item | 
+			self selectionChanged: item selectedItem ];
 		contextMenu: [ 
 			self contextMenu: self newMenu for: list selectedItem ]
 ]
@@ -222,8 +223,9 @@ OPDiagramsList >> initializeToolbar [
 
 { #category : #actions }
 OPDiagramsList >> isDeleteAllowedFor: aDiagram [
-	^ project isNotNil
-		and: [ (project diagramsOf: aDiagram model) size > 1 ]
+
+	^ project isNotNil and: [ 
+		  (project diagramsOf: aDiagram modelElement) size > 1 ]
 ]
 
 { #category : #'accessing - spec' }

@@ -17,7 +17,7 @@ OPTestPlugin >> diagramControllerClass [
 
 { #category : #accessing }
 OPTestPlugin >> diagramSerializerClass [
-	^ OPJsonDiagramSerializer
+	^ OPStonDiagramSerializer
 ]
 
 { #category : #accessing }

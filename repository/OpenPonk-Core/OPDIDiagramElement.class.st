@@ -2,13 +2,13 @@ Class {
 	#name : #OPDIDiagramElement,
 	#superclass : #Object,
 	#instVars : [
+		'modelElements',
+		'owningElement',
+		'targetEdges',
+		'sourceEdges',
 		'sharedStyle',
 		'localStyle',
 		'ownedElements',
-		'owningElement',
-		'modelElements',
-		'targetEdges',
-		'sourceEdges',
 		'roassalShape',
 		'canvas'
 	],
@@ -20,6 +20,15 @@ OPDIDiagramElement class >> forModelElement: anObject [
 
 	^ self new
 		  modelElement: anObject;
+		  yourself
+]
+
+{ #category : #rendering }
+OPDIDiagramElement class >> in: anOwner forModelElement: anObject [
+
+	^ self new
+		  modelElement: anObject;
+		  owningElement: anOwner;
 		  yourself
 ]
 
@@ -37,10 +46,32 @@ OPDIDiagramElement class >> renderForController: aController [
 		  yourself
 ]
 
+{ #category : #'ston-core' }
+OPDIDiagramElement class >> stonAllInstVarNames [
+
+	"Override to encode my instances using a custom set of instance variables or to define their order."
+
+	^ super stonAllInstVarNames copyWithoutAll:
+		  #( #roassalShape #canvas )
+]
+
 { #category : #accessing }
 OPDIDiagramElement >> canvas [
 
 	^ canvas
+]
+
+{ #category : #'instance creation' }
+OPDIDiagramElement >> fromSton: stonReader [
+
+	stonReader parseMapDo: [ :instVarName :value | 
+		instVarName = #modelElements
+			ifTrue: [ 
+				self modelElements: (value collect: [ :each | 
+						 OPModelObjectReference withUUID: ([ UUID fromString: each ]
+								  on: Error
+								  do: [ each ]) ]) ]
+			ifFalse: [ self instVarNamed: instVarName asString put: value ] ]
 ]
 
 { #category : #initialization }
@@ -103,6 +134,7 @@ OPDIDiagramElement >> modelElement [
 { #category : #accessing }
 OPDIDiagramElement >> modelElement: anObject [
 
+	anObject ifNil: [ ^ self modelElements: {  } ].
 	self modelElements: { anObject }
 ]
 
@@ -115,7 +147,17 @@ OPDIDiagramElement >> modelElements [
 { #category : #accessing }
 OPDIDiagramElement >> modelElements: aCollection [
 
+	self haltIf: (aCollection anySatisfy: [ :any | any isNil ]).
 	modelElements := aCollection
+]
+
+{ #category : #'as yet unclassified' }
+OPDIDiagramElement >> ownedElementRenderedIn: aCanvas [
+
+	canvas ifNil: [ ^ canvas := aCanvas ].
+	canvas = aCanvas ifFalse: [ 
+		self error:
+			'Reusing same diagram element for 2 canvases not allowed' ]
 ]
 
 { #category : #accessing }
@@ -165,25 +207,62 @@ OPDIDiagramElement >> removeRender [
 ]
 
 { #category : #rendering }
-OPDIDiagramElement >> render [
+OPDIDiagramElement >> renderBasicShape [
+
+	"should render a simple shape without any interactivity and complexity (for example for outlining the shape when being created before it is fully added)"
 
 	^ self subclassResponsibility
 ]
 
 { #category : #rendering }
-OPDIDiagramElement >> renderIn: aCanvas [
+OPDIDiagramElement >> renderBasicShapeIn: aCanvas [
 
-	self isRendered ifTrue: [ 
+	canvas ifNotNil: [ 
 		canvas = aCanvas ifFalse: [ 
 			self error:
 				'Reusing same diagram element for 2 canvases not allowed' ].
-		^ self ].
+		self isRendered ifTrue: [ ^ self ] ].
 	canvas := aCanvas.
-	self render.
+	self renderBasicShape.
+	^ roassalShape
+]
+
+{ #category : #rendering }
+OPDIDiagramElement >> renderIn: aCanvas [
+
+	self renderBasicShapeIn: aCanvas.
+	self renderShapeDetails.
 	self updateRenderFromModel.
 	self updateRenderFromSelf.
 	self ownedElements do: [ :each | each renderIn: aCanvas ].
+	self owningElement ifNotNil: [ :element | 
+		element ownedElementRenderedIn: self canvas ].
 	^ roassalShape
+]
+
+{ #category : #rendering }
+OPDIDiagramElement >> renderShapeDetails [
+
+	"should render details of a shape created by renderBasicShape ... this method is there to add interactivity and complexity like adding labels, actions on click etc."
+
+	"do nothing by default"
+
+	
+]
+
+{ #category : #serialization }
+OPDIDiagramElement >> resolveAllModelElements: aDictionary [
+
+	self resolveModelElements: aDictionary.
+	self ownedElements do: [ :each | 
+		each resolveAllModelElements: aDictionary ]
+]
+
+{ #category : #serialization }
+OPDIDiagramElement >> resolveModelElements: aDictionary [
+
+	self modelElements: (self modelElements collect: [ :each | 
+			 each modelObjectFrom: aDictionary ])
 ]
 
 { #category : #rendering }
@@ -214,6 +293,59 @@ OPDIDiagramElement >> sourceEdges: aCollection [
 	sourceEdges
 		removeAll;
 		addAll: aCollection
+]
+
+{ #category : #'ston persistence' }
+OPDIDiagramElement >> stonOn: stonWriter [
+
+	stonWriter writeObject: self streamMap: [ :dictionary | 
+		self class stonAllInstVarNames do: [ :each | 
+			| value |
+			value := self instVarNamed: each.
+			each = #modelElements ifTrue: [ 
+				value := modelElements collect: [ :eachModelElement | 
+					         eachModelElement uuid asString ] ].
+			(value isKindOf: SRToManyLink) ifTrue: [ 
+				value := value species newFrom: value ].
+			value ifNotNil: [ dictionary at: each asSymbol put: value ] ] ]
+]
+
+{ #category : #initialization }
+OPDIDiagramElement >> stonPostReferenceResolution [
+
+	"Hook that is called when references were resolved processing this object or one of its sub objects. This will most probably influence hash values. Override to take appropriate action."
+
+	ownedElements := (SRToManyLink
+		                  on: self
+		                  slot: #ownedElements
+		                  oppositeSlot: #owningElement)
+		                 addAll: ownedElements;
+		                 yourself.
+	sourceEdges := (SRToManyLink
+		                on: self
+		                slot: #sourceEdges
+		                oppositeSlot: #source)
+		               addAll: sourceEdges;
+		               yourself.
+	targetEdges := (SRToManyLink
+		                on: self
+		                slot: #targetEdges
+		                oppositeSlot: #target)
+		               addAll: targetEdges;
+		               yourself
+]
+
+{ #category : #'instance creation' }
+OPDIDiagramElement >> stonProcessSubObjects: block [
+
+	"Execute block to (potentially) change each of my subObjects.
+	In general, all instance and indexable variables are processed.
+	Overwrite when necessary. Not used when #stonContainSubObjects returns false."
+
+	self class stonAllInstVarNames do: [ :each | 
+		self
+			instVarNamed: each
+			put: (block value: (self instVarNamed: each)) ]
 ]
 
 { #category : #accessing }

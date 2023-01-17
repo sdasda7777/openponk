@@ -4,6 +4,12 @@ Class {
 	#category : #'OpenPonk-Core-Persistence'
 }
 
+{ #category : #testing }
+OPStonSerializer class >> isDeprecated [
+
+	^ true
+]
+
 { #category : #formatting }
 OPStonSerializer >> formatName [
 	^ 'ston'
