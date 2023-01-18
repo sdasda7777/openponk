@@ -57,7 +57,7 @@ OPRSAnchorConstraintUpdater >> balance: aNumber [
 OPRSAnchorConstraintUpdater >> computeAbsoluteBalance [
 
 	| lineLength |
-	lineLength := self segments sumNumbers: [ :segment | segment length ].
+	lineLength := self lineLength.
 	balance > 1 ifTrue: [ ^ lineLength min: balance ].
 	balance < 0 ifTrue: [ ^ 0 max: lineLength - balance negated ].
 	^ lineLength * balance
@@ -108,6 +108,12 @@ OPRSAnchorConstraintUpdater >> extraDistance [
 OPRSAnchorConstraintUpdater >> line: aLine [
 
 	line := aLine
+]
+
+{ #category : #building }
+OPRSAnchorConstraintUpdater >> lineLength [
+
+	^ self segments sumNumbers: [ :segment | segment length ]
 ]
 
 { #category : #accessing }
@@ -175,6 +181,45 @@ OPRSAnchorConstraintUpdater >> moveShape [
 		self moveAwayFrom: from via: self anchorSegment vector ].
 	balance < 0 & (shape encompassingRectangle intersects: to) ifTrue: [ 
 		self moveAwayFrom: to via: self anchorSegment vector negated ]
+]
+
+{ #category : #building }
+OPRSAnchorConstraintUpdater >> nearestPointInfo [
+
+	| currentNearest totalLengthFromStart |
+	totalLengthFromStart := 0.
+	currentNearest := OPRSAnchorConstraintNearestPoint new.
+	currentNearest
+		segment: self segments first;
+		point: self segments first from;
+		previousSegmentsLength: totalLengthFromStart.
+
+	self segments do: [ :each | 
+		| nearestPoint |
+		nearestPoint := each nearestPointTo: shape position.
+		(nearestPoint distanceTo: shape position)
+		< (currentNearest distanceTo: shape position) ifTrue: [ 
+			currentNearest
+				segment: each;
+				point: nearestPoint;
+				previousSegmentsLength: totalLengthFromStart ].
+		totalLengthFromStart := totalLengthFromStart + each length ].
+	currentNearest lineLength: totalLengthFromStart.
+	^ currentNearest
+]
+
+{ #category : #'as yet unclassified' }
+OPRSAnchorConstraintUpdater >> nearestSegment [
+
+	| segmentsWithDistances |
+	segmentsWithDistances := self segments collect: [ :each | 
+		                         each -> (each distanceTo: shape position) ].
+	^ (segmentsWithDistances copyWithoutFirst
+		   inject: segmentsWithDistances first
+		   into: [ :nearest :current | 
+			   current value < nearest value
+				   ifTrue: [ current ]
+				   ifFalse: [ nearest ] ]) key
 ]
 
 { #category : #accessing }
