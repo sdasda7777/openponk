@@ -17,13 +17,6 @@ Class {
 }
 
 { #category : #building }
-OPRSAnchorConstraintUpdater >> absoluteBalance [
-
-	^ absoluteBalance ifNil: [ 
-		  absoluteBalance := self computeAbsoluteBalance ]
-]
-
-{ #category : #building }
 OPRSAnchorConstraintUpdater >> anchorPoint [
 
 	anchorPoint ifNil: [ self computeAnchorSegmentAndPoint ].
@@ -56,11 +49,7 @@ OPRSAnchorConstraintUpdater >> balance: aNumber [
 { #category : #building }
 OPRSAnchorConstraintUpdater >> computeAbsoluteBalance [
 
-	| lineLength |
-	lineLength := self lineLength.
-	balance > 1 ifTrue: [ ^ lineLength min: balance ].
-	balance < 0 ifTrue: [ ^ 0 max: lineLength - balance negated ].
-	^ lineLength * balance
+	^ self lineLength * ((balance min: 1) max: 0)
 ]
 
 { #category : #building }
@@ -70,9 +59,9 @@ OPRSAnchorConstraintUpdater >> computeAnchorSegmentAndPoint [
 	sum := 0.
 	self segments do: [ :each | 
 		newSum := sum + each length.
-		(self absoluteBalance between: sum and: newSum) ifTrue: [ 
+		(self lengthFromStartOfBalance between: sum and: newSum) ifTrue: [ 
 			anchorSegment := each.
-			anchorPoint := each pointForBalance: self absoluteBalance - sum.
+			anchorPoint := each pointAtLength: self lengthFromStartOfBalance - sum.
 			^ self ].
 		sum := newSum ].
 	self error: 'failed to find a segment'
@@ -102,6 +91,13 @@ OPRSAnchorConstraintUpdater >> computeExtraDistance [
 OPRSAnchorConstraintUpdater >> extraDistance [
 
 	^ extraDistance ifNil: [ extraDistance := self computeExtraDistance ]
+]
+
+{ #category : #building }
+OPRSAnchorConstraintUpdater >> lengthFromStartOfBalance [
+
+	^ absoluteBalance ifNil: [ 
+		  absoluteBalance := self computeAbsoluteBalance ]
 ]
 
 { #category : #building }
@@ -171,9 +167,15 @@ OPRSAnchorConstraintUpdater >> moveAwayFromSegment: aSegment [
 { #category : #accessing }
 OPRSAnchorConstraintUpdater >> moveShape [
 
-	| from to |
 	shape translateTo: self anchorPoint
 		+ (self anchorSegment vector normal * minDistance negated).
+	self moveShapeAwayFromCollisions
+]
+
+{ #category : #accessing }
+OPRSAnchorConstraintUpdater >> moveShapeAwayFromCollisions [
+
+	| from to |
 	self moveAwayFromSegment: self anchorSegment.
 	from := line from encompassingRectangle expandBy: minDistance abs.
 	to := line to encompassingRectangle expandBy: minDistance abs.

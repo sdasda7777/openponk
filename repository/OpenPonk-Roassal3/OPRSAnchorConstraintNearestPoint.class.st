@@ -58,3 +58,9 @@ OPRSAnchorConstraintNearestPoint >> segment: anObject [
 
 	segment := anObject
 ]
+
+{ #category : #geometry }
+OPRSAnchorConstraintNearestPoint >> sideOfPoint: aPoint [
+
+	^ segment sideOfPoint: aPoint
+]

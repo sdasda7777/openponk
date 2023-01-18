@@ -21,7 +21,7 @@ OPRSAnchorConstraint >> addAnchorAndGuideLine [
 		from: shape;
 		to: self anchorShape.
 	shape canvas add: self guideLine.
-	self lineMoved.
+	self moveShape.
 	shape signalUpdate
 ]
 
@@ -50,10 +50,10 @@ OPRSAnchorConstraint >> balance: aNumber [
 OPRSAnchorConstraint >> build [
 
 	line when: RSShapeRemovedEvent do: [ self remove ].
-	line from when: RSPositionChangedEvent do: [ self lineMoved ].
-	line to when: RSPositionChangedEvent do: [ self lineMoved ].
+	line from when: RSPositionChangedEvent do: [ self moveShape ].
+	line to when: RSPositionChangedEvent do: [ self moveShape ].
 	shape when: RSMouseLeftDragStart do: [ self addAnchorAndGuideLine ].
-	shape when: RSMouseDragging  do: [ self shapeMoved ].
+	shape when: RSMouseDragging  do: [ self saveShapePosition ].
 	shape when: RSMouseDragEnd do: [ self removeAnchorAndGuideLine ]
 ]
 
@@ -89,12 +89,6 @@ OPRSAnchorConstraint >> line [
 	^ line
 ]
 
-{ #category : #updating }
-OPRSAnchorConstraint >> lineMoved [
-
-	self createUpdater update
-]
-
 { #category : #accessing }
 OPRSAnchorConstraint >> minDistance [
 	^ minDistance
@@ -102,7 +96,16 @@ OPRSAnchorConstraint >> minDistance [
 
 { #category : #accessing }
 OPRSAnchorConstraint >> minDistance: anInteger [
+
+	"Attempted distance from line to the right from the line looking from start to end. Negative number means to the right"
+
 	minDistance := anInteger
+]
+
+{ #category : #updating }
+OPRSAnchorConstraint >> moveShape [
+
+	self createUpdater update
 ]
 
 { #category : #'as yet unclassified' }
@@ -128,19 +131,21 @@ OPRSAnchorConstraint >> removeAnchorAndGuideLine [
 	shape signalUpdate
 ]
 
+{ #category : #updating }
+OPRSAnchorConstraint >> saveShapePosition [
+
+	| nearestPointInfo absoluteMinDistance |
+	nearestPointInfo := self createUpdater nearestPointInfo.
+	balance := nearestPointInfo balance.
+	absoluteMinDistance := nearestPointInfo distanceTo: shape position.
+	minDistance := absoluteMinDistance
+	               * (nearestPointInfo sideOfPoint: shape position).
+	self createUpdater moveAnchor
+]
+
 { #category : #accessing }
 OPRSAnchorConstraint >> shape [
 	^ shape
-]
-
-{ #category : #updating }
-OPRSAnchorConstraint >> shapeMoved [
-
-	| nearestPointInfo |
-	nearestPointInfo := self createUpdater nearestPointInfo.
-	balance := nearestPointInfo balance.
-	minDistance := nearestPointInfo distanceTo: shape position.
-	self createUpdater moveAnchor
 ]
 
 { #category : #building }
