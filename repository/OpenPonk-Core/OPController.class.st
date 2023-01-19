@@ -259,7 +259,7 @@ OPController >> removeDependentControllers [
 { #category : #destruction }
 OPController >> removeDiagramElement [
 
-	self diagramElement ifNotNil: #removeRender.
+	self diagramElement ifNotNil: #remove.
 	diagramElement := nil
 ]
 

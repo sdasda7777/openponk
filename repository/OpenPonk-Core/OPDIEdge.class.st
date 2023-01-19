@@ -40,6 +40,14 @@ OPDIEdge >> from [
 	^ self source
 ]
 
+{ #category : #removing }
+OPDIEdge >> remove [
+
+	super remove.
+	self source: nil.
+	self target: nil
+]
+
 { #category : #rendering }
 OPDIEdge >> renderBasicShape [
 

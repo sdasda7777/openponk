@@ -191,10 +191,10 @@ OPDIDiagramElement >> owningElement: aDiagramElement [
 { #category : #removing }
 OPDIDiagramElement >> remove [
 
-	self
-		deprecated: 'Use #removeRender instead.'
-		transformWith: '`@receiver remove' -> '`@receiver removeRender'.
-	^ self removeRender
+	[ self ownedElements isNotEmpty ] whileTrue: [ 
+		self ownedElements anyOne remove ].
+	self removeRender.
+	self owningElement: nil
 ]
 
 { #category : #removing }
@@ -306,7 +306,7 @@ OPDIDiagramElement >> stonOn: stonWriter [
 				value := modelElements collect: [ :eachModelElement | 
 					         eachModelElement uuid asString ] ].
 			(value isKindOf: SRToManyLink) ifTrue: [ 
-				value := value species newFrom: value ].
+				value := Array withAll: value ].
 			value ifNotNil: [ dictionary at: each asSymbol put: value ] ] ]
 ]
 

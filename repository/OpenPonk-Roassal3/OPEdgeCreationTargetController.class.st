@@ -36,7 +36,7 @@ OPEdgeCreationTargetController >> remove [
 	edgeController target = self ifTrue: [ 
 		edgeController target: nil.
 		edgeController removeDiagramElement ].
-	diagramElement removeRender.
+	diagramElement remove.
 	diagramElement := nil
 ]
 
