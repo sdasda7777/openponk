@@ -49,11 +49,12 @@ OPRSAnchorConstraint >> balance: aNumber [
 { #category : #building }
 OPRSAnchorConstraint >> build [
 
+	shape propertyAt: self class put: self.
 	line when: RSShapeRemovedEvent do: [ self remove ].
 	line from when: RSPositionChangedEvent do: [ self moveShape ].
 	line to when: RSPositionChangedEvent do: [ self moveShape ].
 	shape when: RSMouseLeftDragStart do: [ self addAnchorAndGuideLine ].
-	shape when: RSMouseDragging  do: [ self saveShapePosition ].
+	shape when: RSMouseDragging do: [ self saveShapePosition ].
 	shape when: RSMouseDragEnd do: [ self removeAnchorAndGuideLine ]
 ]
 

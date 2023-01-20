@@ -61,6 +61,14 @@ OPDIDiagramElement >> canvas [
 	^ canvas
 ]
 
+{ #category : #'as yet unclassified' }
+OPDIDiagramElement >> createOwnedElementsWithoutController [
+
+	"Might be overriden to add owned diagram elements that have no controller that would create them, for example labels."
+
+	
+]
+
 { #category : #'instance creation' }
 OPDIDiagramElement >> fromSton: stonReader [
 
@@ -230,11 +238,13 @@ OPDIDiagramElement >> renderBasicShapeIn: aCanvas [
 { #category : #rendering }
 OPDIDiagramElement >> renderIn: aCanvas [
 
+	self isRendered ifTrue: [ ^ self ].
 	self renderBasicShapeIn: aCanvas.
 	self renderShapeDetails.
+	self createOwnedElementsWithoutController.
+	self ownedElements do: [ :each | each renderIn: aCanvas ].
 	self updateRenderFromModel.
 	self updateRenderFromSelf.
-	self ownedElements do: [ :each | each renderIn: aCanvas ].
 	self owningElement ifNotNil: [ :element | 
 		element ownedElementRenderedIn: self canvas ].
 	^ roassalShape
@@ -243,7 +253,7 @@ OPDIDiagramElement >> renderIn: aCanvas [
 { #category : #rendering }
 OPDIDiagramElement >> renderShapeDetails [
 
-	"should render details of a shape created by renderBasicShape ... this method is there to add interactivity and complexity like adding labels, actions on click etc."
+	"Should render details of a shape created by renderBasicShape. This method is there to add interactivity and complexity like adding labels, actions on click etc. that have no own diagram elements (that labels usually have!)."
 
 	"do nothing by default"
 

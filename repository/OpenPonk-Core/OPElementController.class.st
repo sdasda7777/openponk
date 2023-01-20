@@ -121,6 +121,12 @@ OPElementController >> isCommon [
 	^ false
 ]
 
+{ #category : #testing }
+OPElementController >> isRendered [
+
+	^ self diagramElement isNotNil and: [ self diagramElement isRendered ]
+]
+
 { #category : #accessing }
 OPElementController >> layout [
 	^ OPElementLayout withPosition: self figure position

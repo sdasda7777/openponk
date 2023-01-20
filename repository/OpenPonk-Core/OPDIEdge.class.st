@@ -48,12 +48,6 @@ OPDIEdge >> remove [
 	self target: nil
 ]
 
-{ #category : #rendering }
-OPDIEdge >> renderBasicShape [
-
-	^ self subclassResponsibility
-]
-
 { #category : #accessing }
 OPDIEdge >> source [
 
