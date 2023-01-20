@@ -36,13 +36,20 @@ OPDIStyle >> addedAsSharedToStyledElement: aDiagramElement [
 
 { #category : #accessing }
 OPDIStyle >> at: aSymbol [
-	^ properties
-		at: aSymbol
-		ifAbsent:
-			[ 
-			self styledElement sharedStyle = self
-				ifTrue: [ self styledElement owningElement sharedStyle at: aSymbol ]
-				ifFalse: [ self styledElement sharedStyle at: aSymbol ] ]
+
+	^ properties at: aSymbol
+]
+
+{ #category : #accessing }
+OPDIStyle >> at: aSymbol ifAbsent: aBlock [
+
+	^ properties at: aSymbol ifAbsent: aBlock
+]
+
+{ #category : #accessing }
+OPDIStyle >> at: aSymbol ifPresent: aBlock [
+
+	^ properties at: aSymbol ifPresent: aBlock
 ]
 
 { #category : #accessing }

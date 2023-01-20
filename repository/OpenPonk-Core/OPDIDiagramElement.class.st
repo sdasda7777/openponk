@@ -359,8 +359,15 @@ OPDIDiagramElement >> stonProcessSubObjects: block [
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> style [
-	^ self localStyle ifNil: [ self sharedStyle ]
+OPDIDiagramElement >> stylePropertyNamed: aName ifAbsent: aBlock [
+
+	self localStyle ifNotNil: [ :style | 
+		style at: aName ifPresent: [ :value | ^ value ] ].
+	self sharedStyle ifNotNil: [ :style | 
+		style at: aName ifPresent: [ :value | ^ value ] ].
+	self owningElement ifNotNil: [ :owner | 
+		^ owner stylePropertyNamed: aName ifAbsent: aBlock ].
+	^ aBlock value
 ]
 
 { #category : #accessing }

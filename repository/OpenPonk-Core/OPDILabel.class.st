@@ -34,33 +34,33 @@ OPDILabel >> defaultFontSize [
 { #category : #accessing }
 OPDILabel >> emphasis [
 
-	^ self style
-		  ifNil: [ self defaultEmphasis ]
-		  ifNotNil: [ :style | style emphasis ]
+	^ self
+		  stylePropertyNamed: #fontEmphasis
+		  ifAbsent: [ self defaultEmphasis ]
 ]
 
 { #category : #accessing }
 OPDILabel >> fontColor [
 
-	^ self style
-		  ifNil: [ self defaultFontColor ]
-		  ifNotNil: [ :style | style fontColor ]
+	^ self
+		  stylePropertyNamed: #fontColor
+		  ifAbsent: [ self defaultFontColor ]
 ]
 
 { #category : #accessing }
 OPDILabel >> fontName [
 
-	^ self style
-		  ifNil: [ self defaultFontName ]
-		  ifNotNil: [ :style | style fontName ]
+	^ self
+		  stylePropertyNamed: #fontName
+		  ifAbsent: [ self defaultFontName ]
 ]
 
 { #category : #accessing }
 OPDILabel >> fontSize [
 
-	^ self style
-		  ifNil: [ self defaultFontSize ]
-		  ifNotNil: [ :style | style fontSize ]
+	^ self
+		  stylePropertyNamed: #fontSize
+		  ifAbsent: [ self defaultFontSize ]
 ]
 
 { #category : #rendering }
