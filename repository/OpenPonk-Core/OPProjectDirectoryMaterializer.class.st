@@ -3,18 +3,43 @@ I take a folder and try to materialize a project from it.
 "
 Class {
 	#name : #OPProjectDirectoryMaterializer,
-	#superclass : #Object,
+	#superclass : #OPSerializer,
 	#category : #'OpenPonk-Core-Persistence'
 }
+
+{ #category : #'as yet unclassified' }
+OPProjectDirectoryMaterializer class >> exportSubject [
+
+	^ #project
+]
+
+{ #category : #'as yet unclassified' }
+OPProjectDirectoryMaterializer class >> exportVersion [
+
+	^ 0
+]
+
+{ #category : #formatting }
+OPProjectDirectoryMaterializer class >> formatName [
+
+	^ #directory
+]
+
+{ #category : #accessing }
+OPProjectDirectoryMaterializer class >> maxImportVersion [
+
+	^ 1
+]
+
+{ #category : #accessing }
+OPProjectDirectoryMaterializer class >> minImportVersion [
+
+	^ 1
+]
 
 { #category : #accessing }
 OPProjectDirectoryMaterializer >> exporter [
 	^ 'OpenPonk'
-]
-
-{ #category : #accessing }
-OPProjectDirectoryMaterializer >> exporterVersion [
-	^ OPVersion current fullVersionString
 ]
 
 { #category : #'public - reading' }

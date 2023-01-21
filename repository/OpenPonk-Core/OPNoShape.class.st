@@ -1,6 +1,6 @@
 Class {
-	#name : #OPDINoShape,
-	#superclass : #OPDIShape,
+	#name : #OPNoShape,
+	#superclass : #OPShape,
 	#instVars : [
 		'moveSubscription'
 	],
@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #rendering }
-OPDINoShape class >> renderToPosition: aPoint onCanvas: aCanvas [
+OPNoShape class >> renderToPosition: aPoint onCanvas: aCanvas [
 
 	^ self new
 		  bounds: (OPDIBounds withPosition: aPoint extent: 2 @ 2);
@@ -17,14 +17,14 @@ OPDINoShape class >> renderToPosition: aPoint onCanvas: aCanvas [
 ]
 
 { #category : #rendering }
-OPDINoShape >> removeRender [
+OPNoShape >> removeRender [
 
 	canvas announcer unsubscribe: self.
 	super removeRender
 ]
 
 { #category : #rendering }
-OPDINoShape >> renderBasicShape [
+OPNoShape >> renderBasicShape [
 
 	roassalShape := RSBox new
 		                color: Color transparent;

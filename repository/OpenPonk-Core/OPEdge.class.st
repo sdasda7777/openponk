@@ -1,6 +1,6 @@
 Class {
-	#name : #OPDIEdge,
-	#superclass : #OPDIDiagramElement,
+	#name : #OPEdge,
+	#superclass : #OPDiagramElement,
 	#instVars : [
 		'source',
 		'target',
@@ -10,7 +10,7 @@ Class {
 }
 
 { #category : #rendering }
-OPDIEdge class >> renderForController: aController [
+OPEdge class >> renderForController: aController [
 
 	^ self new
 		  modelElement: aController model;
@@ -21,7 +21,7 @@ OPDIEdge class >> renderForController: aController [
 ]
 
 { #category : #rendering }
-OPDIEdge class >> renderSimplifiedForController: aController [
+OPEdge class >> renderSimplifiedForController: aController [
 
 	^ self new
 		  modelElement: aController model;
@@ -32,7 +32,7 @@ OPDIEdge class >> renderSimplifiedForController: aController [
 ]
 
 { #category : #deprecated }
-OPDIEdge >> from [
+OPEdge >> from [
 
 	self
 		deprecated: 'Use #source'
@@ -41,7 +41,7 @@ OPDIEdge >> from [
 ]
 
 { #category : #removing }
-OPDIEdge >> remove [
+OPEdge >> remove [
 
 	super remove.
 	self source: nil.
@@ -49,13 +49,13 @@ OPDIEdge >> remove [
 ]
 
 { #category : #accessing }
-OPDIEdge >> source [
+OPEdge >> source [
 
 	^ source
 ]
 
 { #category : #accessing }
-OPDIEdge >> source: anElement [
+OPEdge >> source: anElement [
 
 	source := SRToOneLink
 		          on: self
@@ -66,13 +66,13 @@ OPDIEdge >> source: anElement [
 ]
 
 { #category : #accessing }
-OPDIEdge >> target [
+OPEdge >> target [
 
 	^ target
 ]
 
 { #category : #accessing }
-OPDIEdge >> target: anElement [
+OPEdge >> target: anElement [
 
 	target := SRToOneLink
 		          on: self
@@ -83,7 +83,7 @@ OPDIEdge >> target: anElement [
 ]
 
 { #category : #deprecated }
-OPDIEdge >> to [
+OPEdge >> to [
 
 	self
 		deprecated: 'Use #target'
@@ -92,14 +92,14 @@ OPDIEdge >> to [
 ]
 
 { #category : #'as yet unclassified' }
-OPDIEdge >> updateFromRender [
+OPEdge >> updateFromRender [
 
 	self waypoints: roassalShape controlPoints.
 	super updateFromRender
 ]
 
 { #category : #'as yet unclassified' }
-OPDIEdge >> updateRenderFromSelf [
+OPEdge >> updateRenderFromSelf [
 
 	self isRendered ifFalse: [ ^ self ].
 	waypoints ifNotNil: [ roassalShape controlPoints: waypoints ].
@@ -107,13 +107,13 @@ OPDIEdge >> updateRenderFromSelf [
 ]
 
 { #category : #accessing }
-OPDIEdge >> waypoints [
+OPEdge >> waypoints [
 
 	^ waypoints
 ]
 
 { #category : #accessing }
-OPDIEdge >> waypoints: anObject [
+OPEdge >> waypoints: anObject [
 
 	waypoints := anObject
 ]

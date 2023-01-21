@@ -10,6 +10,24 @@ Class {
 	#category : #'OpenPonk-Core-Persistence'
 }
 
+{ #category : #'as yet unclassified' }
+OPMementoDirectorySerializer class >> exportVersion [
+
+	^ 1
+]
+
+{ #category : #formatting }
+OPMementoDirectorySerializer class >> formatName [
+
+	^ #directory
+]
+
+{ #category : #accessing }
+OPMementoDirectorySerializer class >> minImportVersion [
+
+	^ 1
+]
+
 { #category : #'instance creation' }
 OPMementoDirectorySerializer class >> withModelSerializer: aModelSerializer diagramsSerializer: aDiagramsSerializer [
 	^ self new

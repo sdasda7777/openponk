@@ -1,6 +1,6 @@
 Class {
-	#name : #OPDILabel,
-	#superclass : #OPDIShape,
+	#name : #OPLabel,
+	#superclass : #OPShape,
 	#instVars : [
 		'text'
 	],
@@ -8,31 +8,31 @@ Class {
 }
 
 { #category : #accessing }
-OPDILabel >> defaultEmphasis [
+OPLabel >> defaultEmphasis [
 
 	^ TextEmphasis normal
 ]
 
 { #category : #accessing }
-OPDILabel >> defaultFontColor [
+OPLabel >> defaultFontColor [
 
 	^ Color black
 ]
 
 { #category : #accessing }
-OPDILabel >> defaultFontName [
+OPLabel >> defaultFontName [
 
 	^ RSLabel defaultFont familyName
 ]
 
 { #category : #accessing }
-OPDILabel >> defaultFontSize [
+OPLabel >> defaultFontSize [
 
 	^ 10
 ]
 
 { #category : #accessing }
-OPDILabel >> emphasis [
+OPLabel >> emphasis [
 
 	^ self
 		  stylePropertyNamed: #fontEmphasis
@@ -40,7 +40,7 @@ OPDILabel >> emphasis [
 ]
 
 { #category : #accessing }
-OPDILabel >> fontColor [
+OPLabel >> fontColor [
 
 	^ self
 		  stylePropertyNamed: #fontColor
@@ -48,7 +48,7 @@ OPDILabel >> fontColor [
 ]
 
 { #category : #accessing }
-OPDILabel >> fontName [
+OPLabel >> fontName [
 
 	^ self
 		  stylePropertyNamed: #fontName
@@ -56,7 +56,7 @@ OPDILabel >> fontName [
 ]
 
 { #category : #accessing }
-OPDILabel >> fontSize [
+OPLabel >> fontSize [
 
 	^ self
 		  stylePropertyNamed: #fontSize
@@ -64,7 +64,7 @@ OPDILabel >> fontSize [
 ]
 
 { #category : #rendering }
-OPDILabel >> renderBasicShape [
+OPLabel >> renderBasicShape [
 
 	roassalShape := RSLabel new.
 	roassalShape
@@ -79,7 +79,7 @@ OPDILabel >> renderBasicShape [
 ]
 
 { #category : #accessing }
-OPDILabel >> text [
+OPLabel >> text [
 
 	^ self subclassResponsibility
 ]

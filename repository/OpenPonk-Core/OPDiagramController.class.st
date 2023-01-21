@@ -649,7 +649,7 @@ OPDiagramController >> rebuild [
 	[ :job | 
 	job title: 'Preparing diagram'.
 	diagramElement ifNil: [ 
-		diagramElement := OPDIOpenPonkDiagram forModelElement: model ].
+		diagramElement := OPOpenPonkDiagram forModelElement: model ].
 	diagramElement removeRender.
 	diagramElement renderIn: self canvas.
 	self showElements.

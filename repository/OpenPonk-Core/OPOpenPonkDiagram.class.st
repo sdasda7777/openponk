@@ -1,6 +1,6 @@
 Class {
-	#name : #OPDIOpenPonkDiagram,
-	#superclass : #OPDIDiagram,
+	#name : #OPOpenPonkDiagram,
+	#superclass : #OPDiagram,
 	#instVars : [
 		'isOpen',
 		'order',
@@ -11,51 +11,51 @@ Class {
 }
 
 { #category : #accessing }
-OPDIOpenPonkDiagram >> camera: aCamera [
+OPOpenPonkDiagram >> camera: aCamera [
 
 	camera := OPDICamera newFrom: aCamera
 ]
 
 { #category : #accessing }
-OPDIOpenPonkDiagram >> isOpen [
+OPOpenPonkDiagram >> isOpen [
 
 	^ isOpen ifNil: [ true ]
 ]
 
 { #category : #accessing }
-OPDIOpenPonkDiagram >> isOpen: anObject [
+OPOpenPonkDiagram >> isOpen: anObject [
 
 	isOpen := anObject
 ]
 
 { #category : #accessing }
-OPDIOpenPonkDiagram >> isSelected [
+OPOpenPonkDiagram >> isSelected [
 
 	^ isSelected ifNil: [ false ]
 ]
 
 { #category : #accessing }
-OPDIOpenPonkDiagram >> isSelected: anObject [
+OPOpenPonkDiagram >> isSelected: anObject [
 
 	isSelected := anObject
 ]
 
 { #category : #removing }
-OPDIOpenPonkDiagram >> removeRender [
+OPOpenPonkDiagram >> removeRender [
 
 	self ownedElements do: #removeRender.
 	roassalShape := nil
 ]
 
 { #category : #'as yet unclassified' }
-OPDIOpenPonkDiagram >> updateFromRender [
+OPOpenPonkDiagram >> updateFromRender [
 
 	super updateFromRender.
 	self camera: roassalShape camera
 ]
 
 { #category : #'as yet unclassified' }
-OPDIOpenPonkDiagram >> updateRenderFromSelf [
+OPOpenPonkDiagram >> updateRenderFromSelf [
 
 	self isRendered ifFalse: [ ^ self ].
 	super updateRenderFromSelf.

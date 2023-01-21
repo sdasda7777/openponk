@@ -1,5 +1,5 @@
 Class {
-	#name : #OPDIDiagramElement,
+	#name : #OPDiagramElement,
 	#superclass : #Object,
 	#instVars : [
 		'modelElements',
@@ -16,7 +16,7 @@ Class {
 }
 
 { #category : #rendering }
-OPDIDiagramElement class >> forModelElement: anObject [
+OPDiagramElement class >> forModelElement: anObject [
 
 	^ self new
 		  modelElement: anObject;
@@ -24,7 +24,7 @@ OPDIDiagramElement class >> forModelElement: anObject [
 ]
 
 { #category : #rendering }
-OPDIDiagramElement class >> in: anOwner forModelElement: anObject [
+OPDiagramElement class >> in: anOwner forModelElement: anObject [
 
 	^ self new
 		  modelElement: anObject;
@@ -33,12 +33,12 @@ OPDIDiagramElement class >> in: anOwner forModelElement: anObject [
 ]
 
 { #category : #testing }
-OPDIDiagramElement class >> isAbstract [
-	^ self = OPDIDiagramElement
+OPDiagramElement class >> isAbstract [
+	^ self = OPDiagramElement
 ]
 
 { #category : #rendering }
-OPDIDiagramElement class >> renderForController: aController [
+OPDiagramElement class >> renderForController: aController [
 
 	^ self new
 		  modelElement: aController model;
@@ -47,7 +47,7 @@ OPDIDiagramElement class >> renderForController: aController [
 ]
 
 { #category : #'ston-core' }
-OPDIDiagramElement class >> stonAllInstVarNames [
+OPDiagramElement class >> stonAllInstVarNames [
 
 	"Override to encode my instances using a custom set of instance variables or to define their order."
 
@@ -56,13 +56,13 @@ OPDIDiagramElement class >> stonAllInstVarNames [
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> canvas [
+OPDiagramElement >> canvas [
 
 	^ canvas
 ]
 
 { #category : #'as yet unclassified' }
-OPDIDiagramElement >> createOwnedElementsWithoutController [
+OPDiagramElement >> createOwnedElementsWithoutController [
 
 	"Might be overriden to add owned diagram elements that have no controller that would create them, for example labels."
 
@@ -70,7 +70,7 @@ OPDIDiagramElement >> createOwnedElementsWithoutController [
 ]
 
 { #category : #'instance creation' }
-OPDIDiagramElement >> fromSton: stonReader [
+OPDiagramElement >> fromSton: stonReader [
 
 	stonReader parseMapDo: [ :instVarName :value | 
 		instVarName = #modelElements
@@ -83,7 +83,7 @@ OPDIDiagramElement >> fromSton: stonReader [
 ]
 
 { #category : #initialization }
-OPDIDiagramElement >> initialize [
+OPDiagramElement >> initialize [
 
 	super initialize.
 	modelElements := #(  ).
@@ -102,31 +102,31 @@ OPDIDiagramElement >> initialize [
 ]
 
 { #category : #rendering }
-OPDIDiagramElement >> isRendered [
+OPDiagramElement >> isRendered [
 
 	^ roassalShape isNotNil and: [ roassalShape isInACanvas ]
 ]
 
 { #category : #testing }
-OPDIDiagramElement >> isSelectable [
+OPDiagramElement >> isSelectable [
 
 	^ roassalShape isSelectable
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> localStyle [
+OPDiagramElement >> localStyle [
 	^ localStyle
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> localStyle: aStyle [
+OPDiagramElement >> localStyle: aStyle [
 
 	localStyle ifNotNil: [ localStyle removedFromStyledElement: self ].
 	(localStyle := aStyle) addedAsLocalToStyledElement: self
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> model [
+OPDiagramElement >> model [
 
 	self
 		deprecated: 'Use #modelElement instead'
@@ -135,32 +135,32 @@ OPDIDiagramElement >> model [
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> modelElement [
+OPDiagramElement >> modelElement [
 
 	^ modelElements first
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> modelElement: anObject [
+OPDiagramElement >> modelElement: anObject [
 
 	anObject ifNil: [ ^ self modelElements: #(  ) ].
 	self modelElements: { anObject }
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> modelElements [
+OPDiagramElement >> modelElements [
 
 	^ modelElements
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> modelElements: aCollection [
+OPDiagramElement >> modelElements: aCollection [
 
 	modelElements := aCollection
 ]
 
 { #category : #'as yet unclassified' }
-OPDIDiagramElement >> ownedElementRenderedIn: aCanvas [
+OPDiagramElement >> ownedElementRenderedIn: aCanvas [
 
 	canvas ifNil: [ ^ canvas := aCanvas ].
 	canvas = aCanvas ifFalse: [ 
@@ -169,12 +169,12 @@ OPDIDiagramElement >> ownedElementRenderedIn: aCanvas [
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> ownedElements [
+OPDiagramElement >> ownedElements [
 	^ ownedElements
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> ownedElements: aCollection [
+OPDiagramElement >> ownedElements: aCollection [
 
 	ownedElements
 		removeAll;
@@ -182,12 +182,12 @@ OPDIDiagramElement >> ownedElements: aCollection [
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> owningElement [
+OPDiagramElement >> owningElement [
 	^ owningElement
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> owningElement: aDiagramElement [
+OPDiagramElement >> owningElement: aDiagramElement [
 	owningElement := SRToOneLink
 		on: self
 		slot: #owningElement
@@ -197,7 +197,7 @@ OPDIDiagramElement >> owningElement: aDiagramElement [
 ]
 
 { #category : #removing }
-OPDIDiagramElement >> remove [
+OPDiagramElement >> remove [
 
 	[ self ownedElements isNotEmpty ] whileTrue: [ 
 		self ownedElements anyOne remove ].
@@ -206,7 +206,7 @@ OPDIDiagramElement >> remove [
 ]
 
 { #category : #removing }
-OPDIDiagramElement >> removeRender [
+OPDiagramElement >> removeRender [
 
 	self ownedElements do: #removeRender.
 	roassalShape ifNil: [ ^ self ].
@@ -215,7 +215,7 @@ OPDIDiagramElement >> removeRender [
 ]
 
 { #category : #rendering }
-OPDIDiagramElement >> renderBasicShape [
+OPDiagramElement >> renderBasicShape [
 
 	"should render a simple shape without any interactivity and complexity (for example for outlining the shape when being created before it is fully added)"
 
@@ -223,7 +223,7 @@ OPDIDiagramElement >> renderBasicShape [
 ]
 
 { #category : #rendering }
-OPDIDiagramElement >> renderBasicShapeIn: aCanvas [
+OPDiagramElement >> renderBasicShapeIn: aCanvas [
 
 	canvas ifNotNil: [ 
 		canvas = aCanvas ifFalse: [ 
@@ -236,7 +236,7 @@ OPDIDiagramElement >> renderBasicShapeIn: aCanvas [
 ]
 
 { #category : #rendering }
-OPDIDiagramElement >> renderIn: aCanvas [
+OPDiagramElement >> renderIn: aCanvas [
 
 	self isRendered ifTrue: [ ^ self ].
 	self renderBasicShapeIn: aCanvas.
@@ -251,7 +251,7 @@ OPDIDiagramElement >> renderIn: aCanvas [
 ]
 
 { #category : #rendering }
-OPDIDiagramElement >> renderShapeDetails [
+OPDiagramElement >> renderShapeDetails [
 
 	"Should render details of a shape created by renderBasicShape. This method is there to add interactivity and complexity like adding labels, actions on click etc. that have no own diagram elements (that labels usually have!)."
 
@@ -261,7 +261,7 @@ OPDIDiagramElement >> renderShapeDetails [
 ]
 
 { #category : #serialization }
-OPDIDiagramElement >> resolveAllModelElements: aDictionary [
+OPDiagramElement >> resolveAllModelElements: aDictionary [
 
 	self resolveModelElements: aDictionary.
 	self ownedElements do: [ :each | 
@@ -269,44 +269,44 @@ OPDIDiagramElement >> resolveAllModelElements: aDictionary [
 ]
 
 { #category : #serialization }
-OPDIDiagramElement >> resolveModelElements: aDictionary [
+OPDiagramElement >> resolveModelElements: aDictionary [
 
 	self modelElements: (self modelElements collect: [ :each | 
 			 each modelObjectFrom: aDictionary ])
 ]
 
 { #category : #rendering }
-OPDIDiagramElement >> roassalShape [
+OPDiagramElement >> roassalShape [
 
 	^ roassalShape
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> sharedStyle [
+OPDiagramElement >> sharedStyle [
 	^ sharedStyle ifNil: [ self owningElement ifNotNil: #sharedStyle ]
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> sharedStyle: aStyle [
+OPDiagramElement >> sharedStyle: aStyle [
 
 	sharedStyle ifNotNil: [ sharedStyle removedFromStyledElement: self ].
 	(sharedStyle := aStyle) addedAsSharedToStyledElement: self
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> sourceEdges [
+OPDiagramElement >> sourceEdges [
 	^ sourceEdges
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> sourceEdges: aCollection [
+OPDiagramElement >> sourceEdges: aCollection [
 	sourceEdges
 		removeAll;
 		addAll: aCollection
 ]
 
 { #category : #'ston persistence' }
-OPDIDiagramElement >> stonOn: stonWriter [
+OPDiagramElement >> stonOn: stonWriter [
 
 	stonWriter writeObject: self streamMap: [ :dictionary | 
 		self class stonAllInstVarNames do: [ :each | 
@@ -321,7 +321,7 @@ OPDIDiagramElement >> stonOn: stonWriter [
 ]
 
 { #category : #initialization }
-OPDIDiagramElement >> stonPostReferenceResolution [
+OPDiagramElement >> stonPostReferenceResolution [
 
 	"Hook that is called when references were resolved processing this object or one of its sub objects. This will most probably influence hash values. Override to take appropriate action."
 
@@ -346,7 +346,7 @@ OPDIDiagramElement >> stonPostReferenceResolution [
 ]
 
 { #category : #'instance creation' }
-OPDIDiagramElement >> stonProcessSubObjects: block [
+OPDiagramElement >> stonProcessSubObjects: block [
 
 	"Execute block to (potentially) change each of my subObjects.
 	In general, all instance and indexable variables are processed.
@@ -359,7 +359,7 @@ OPDIDiagramElement >> stonProcessSubObjects: block [
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> stylePropertyNamed: aName ifAbsent: aBlock [
+OPDiagramElement >> stylePropertyNamed: aName ifAbsent: aBlock [
 
 	| nameSymbol |
 	nameSymbol := aName asSymbol.
@@ -373,7 +373,7 @@ OPDIDiagramElement >> stylePropertyNamed: aName ifAbsent: aBlock [
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> stylePropertyNamed: aName put: aValue [
+OPDiagramElement >> stylePropertyNamed: aName put: aValue [
 
 	self updateFromRender.
 	self localStyle ifNil: [ self localStyle: OPDIOpenPonkStyle new ].
@@ -382,37 +382,37 @@ OPDIDiagramElement >> stylePropertyNamed: aName put: aValue [
 ]
 
 { #category : #'as yet unclassified' }
-OPDIDiagramElement >> supportsColorChange [
+OPDiagramElement >> supportsColorChange [
 
 	^ (self respondsTo: #color) and: [ self respondsTo: #color: ]
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> targetEdges [
+OPDiagramElement >> targetEdges [
 	^ targetEdges
 ]
 
 { #category : #accessing }
-OPDIDiagramElement >> targetEdges: aCollection [
+OPDiagramElement >> targetEdges: aCollection [
 	targetEdges
 		removeAll;
 		addAll: aCollection
 ]
 
 { #category : #'as yet unclassified' }
-OPDIDiagramElement >> updateFromRender [
+OPDiagramElement >> updateFromRender [
 
 	self ownedElements do: #updateFromRender
 ]
 
 { #category : #rendering }
-OPDIDiagramElement >> updateRenderFromModel [
+OPDiagramElement >> updateRenderFromModel [
 
 	self ownedElements do: #updateRenderFromModel
 ]
 
 { #category : #rendering }
-OPDIDiagramElement >> updateRenderFromSelf [
+OPDiagramElement >> updateRenderFromSelf [
 
 	self isRendered ifFalse: [ ^ self ].
 	self ownedElements do: #updateRenderFromSelf.

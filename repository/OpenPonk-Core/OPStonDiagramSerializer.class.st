@@ -4,6 +4,24 @@ Class {
 	#category : #'OpenPonk-Core-Persistence'
 }
 
+{ #category : #'as yet unclassified' }
+OPStonDiagramSerializer class >> exportVersion [
+
+	^ 1
+]
+
+{ #category : #formatting }
+OPStonDiagramSerializer class >> formatName [
+
+	^ #ston
+]
+
+{ #category : #accessing }
+OPStonDiagramSerializer class >> minImportVersion [
+
+	^ 1
+]
+
 { #category : #accessing }
 OPStonDiagramSerializer >> formatName [
 	^ 'ston'

@@ -9,7 +9,7 @@ Class {
 
 { #category : #tests }
 OPDiagramTest >> testAsJsonComplex [
-	view := OPDiagram new
+	view := OPLegacyDiagram new
 		camera:
 			(OPDiagramCamera new
 				offset: 20 @ 30;
@@ -42,7 +42,7 @@ OPDiagramTest >> testAsJsonModel [
 	model := Mock new.
 	model stub name willReturn: 'testComp'.
 	model stub typeName willReturn: 'Component'.
-	view := OPDiagram new model: model.
+	view := OPLegacyDiagram new model: model.
 	self
 		assert: (STON fromString: view asJson)
 		equals: (STON fromString: '{ "commonElements" : [], "visibleElements" : [ ] }')
@@ -50,7 +50,7 @@ OPDiagramTest >> testAsJsonModel [
 
 { #category : #tests }
 OPDiagramTest >> testAsJsonModel2 [
-	view := OPDiagram new model: OPTestContainerModel new.
+	view := OPLegacyDiagram new model: OPTestContainerModel new.
 	self
 		assert: (STON fromString: view asJson)
 		equals: (STON fromString: '{ "commonElements" : [], "visibleElements" : [ ] }')
@@ -64,7 +64,7 @@ OPDiagramTest >> testFromJsonComplex [
 	personUUID := UUID fromString: personUUIDstring.
 	person := Mock new.
 	person stub uuid willReturn: personUUID.
-	view := OPDiagram
+	view := OPLegacyDiagram
 		        ofModel: Mock new
 		        fromJsonString:
 			        '{ 	"camera" : { "offset" : { "x" : 20, "y" : 30 }, "zoom" : 1.2 },
@@ -88,7 +88,7 @@ OPDiagramTest >> testFromJsonComplex [
 OPDiagramTest >> testModel [
 	| model project |
 	model := OPTestContainerModel new.
-	view := OPDiagram new.
+	view := OPLegacyDiagram new.
 	self assert: view modelType equals: 'UndefinedObject'.
 	self assert: view model isNil.
 	self assert: view modelName equals: 'UndefinedObject'.
@@ -106,7 +106,7 @@ OPDiagramTest >> testNewCopy [
 	model := OPTestContainerModel new.
 	project := OPProject new.
 	project addModel: model.
-	view := OPDiagram new
+	view := OPLegacyDiagram new
 		name: 'original';
 		camera:
 			(OPDiagramCamera new
@@ -126,7 +126,7 @@ OPDiagramTest >> testNewCopy [
 { #category : #tests }
 OPDiagramTest >> testUpdateFromRoassalView [
 	| roassalCanvas |
-	view := OPDiagram new.
+	view := OPLegacyDiagram new.
 	roassalCanvas := RSCanvas new.
 	roassalCanvas camera
 		translateTo: 200 @ 27;

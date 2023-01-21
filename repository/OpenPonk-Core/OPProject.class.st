@@ -110,7 +110,7 @@ OPProject >> ensureModelsHaveDiagrams [
 	self addDiagrams: (self models
 			 reject: [ :eachModel | self hasDiagramsModel: eachModel ]
 			 thenCollect: [ :eachModel | 
-			 OPDIOpenPonkDiagram forModelElement: eachModel ])
+			 OPOpenPonkDiagram forModelElement: eachModel ])
 ]
 
 { #category : #adding }

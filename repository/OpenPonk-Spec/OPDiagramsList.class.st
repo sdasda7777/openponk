@@ -106,7 +106,7 @@ OPDiagramsList >> createDiagram [
 		        title: 'Create new' ] doWhileTrue: [ 
 		name isNotNil and: [ name isEmpty ] ].
 	name ifNil: [ ^ self ].
-	diagram := OPDIOpenPonkDiagram forModelElement:
+	diagram := OPOpenPonkDiagram forModelElement:
 		           (openModel ifNil: [ self project models first ]).
 	diagram name: name.
 	project addDiagram: diagram.

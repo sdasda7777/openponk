@@ -1,6 +1,6 @@
 Class {
 	#name : #OPDiagramView,
-	#superclass : #OPDiagram,
+	#superclass : #OPLegacyDiagram,
 	#category : #'OpenPonk-Core-Diagrams'
 }
 

@@ -195,7 +195,7 @@ OPProjectController >> mergeModelsAndDiagramsIntoOne [
 			self project diagrams do: [ :eachDiagram | 
 					workbench closeEditorOfDiagram: eachDiagram ].
 			models do: [ :eachModel | self removeModel: eachModel ].
-			diagram := OPDIOpenPonkDiagram forModelElement: model.
+			diagram := OPOpenPonkDiagram forModelElement: model.
 			diagram ownedElements:
 					(self project diagrams flatCollect: #ownedElements).
 			self project addDiagram: diagram.

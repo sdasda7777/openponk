@@ -1,6 +1,6 @@
 Class {
-	#name : #OPDIShape,
-	#superclass : #OPDIDiagramElement,
+	#name : #OPShape,
+	#superclass : #OPDiagramElement,
 	#traits : 'RSTPositionable',
 	#classTraits : 'RSTPositionable classTrait',
 	#instVars : [
@@ -10,43 +10,43 @@ Class {
 }
 
 { #category : #accessing }
-OPDIShape >> bounds [
+OPShape >> bounds [
 
 	^ bounds
 ]
 
 { #category : #accessing }
-OPDIShape >> bounds: anObject [
+OPShape >> bounds: anObject [
 
 	bounds := anObject
 ]
 
 { #category : #accessing }
-OPDIShape >> encompassingRectangle [
+OPShape >> encompassingRectangle [
 
 	^ roassalShape encompassingRectangle
 ]
 
 { #category : #accessing }
-OPDIShape >> extent [
+OPShape >> extent [
 
 	^ roassalShape extent
 ]
 
 { #category : #accessing }
-OPDIShape >> height [
+OPShape >> height [
 
 	^ roassalShape height
 ]
 
 { #category : #accessing }
-OPDIShape >> position [
+OPShape >> position [
 
 	^ roassalShape position
 ]
 
 { #category : #actions }
-OPDIShape >> translateBy: deltaAsPoint [
+OPShape >> translateBy: deltaAsPoint [
 
 	"Move a shape by a delta value, expressed as a point"
 
@@ -54,7 +54,7 @@ OPDIShape >> translateBy: deltaAsPoint [
 ]
 
 { #category : #actions }
-OPDIShape >> translateTo: aPoint [
+OPShape >> translateTo: aPoint [
 
 	"Translate a shape to a new position, expressed as a point"
 
@@ -62,7 +62,7 @@ OPDIShape >> translateTo: aPoint [
 ]
 
 { #category : #'as yet unclassified' }
-OPDIShape >> updateFromRender [
+OPShape >> updateFromRender [
 
 	self bounds: (OPDIBounds
 			 withPosition: roassalShape position
@@ -71,7 +71,7 @@ OPDIShape >> updateFromRender [
 ]
 
 { #category : #roassal }
-OPDIShape >> updateRenderFromSelf [
+OPShape >> updateRenderFromSelf [
 
 	self isRendered ifFalse: [ ^ self ].
 	bounds ifNotNil: [ 
@@ -82,7 +82,7 @@ OPDIShape >> updateRenderFromSelf [
 ]
 
 { #category : #accessing }
-OPDIShape >> width [
+OPShape >> width [
 
 	^ roassalShape width
 ]

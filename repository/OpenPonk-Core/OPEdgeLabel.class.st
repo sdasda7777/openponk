@@ -1,11 +1,11 @@
 Class {
-	#name : #OPDIEdgeLabel,
-	#superclass : #OPDILabel,
+	#name : #OPEdgeLabel,
+	#superclass : #OPLabel,
 	#category : #'OpenPonk-Core-DiagramInterchange'
 }
 
 { #category : #'as yet unclassified' }
-OPDIEdgeLabel >> anchorToEdge [
+OPEdgeLabel >> anchorToEdge [
 
 	roassalShape @ RSDraggable.
 	OPRSAnchorConstraint new
@@ -15,25 +15,25 @@ OPDIEdgeLabel >> anchorToEdge [
 ]
 
 { #category : #'as yet unclassified' }
-OPDIEdgeLabel >> defaultBalance [
+OPEdgeLabel >> defaultBalance [
 
 	^ self subclassResponsibility
 ]
 
 { #category : #'as yet unclassified' }
-OPDIEdgeLabel >> defaultMinDistance [
+OPEdgeLabel >> defaultMinDistance [
 
 	^ self subclassResponsibility
 ]
 
 { #category : #'as yet unclassified' }
-OPDIEdgeLabel >> renderShapeDetails [
+OPEdgeLabel >> renderShapeDetails [
 
 	self anchorToEdge
 ]
 
 { #category : #rendering }
-OPDIEdgeLabel >> updateRenderFromModel [
+OPEdgeLabel >> updateRenderFromModel [
 
 	roassalShape
 		text: self text;
@@ -43,7 +43,7 @@ OPDIEdgeLabel >> updateRenderFromModel [
 ]
 
 { #category : #roassal }
-OPDIEdgeLabel >> updateRenderFromSelf [
+OPEdgeLabel >> updateRenderFromSelf [
 
 	self isRendered ifFalse: [ ^ self ].
 	super updateRenderFromSelf.
