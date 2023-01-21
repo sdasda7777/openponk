@@ -57,6 +57,7 @@ OPDIOpenPonkDiagram >> updateFromRender [
 { #category : #'as yet unclassified' }
 OPDIOpenPonkDiagram >> updateRenderFromSelf [
 
+	self isRendered ifFalse: [ ^ self ].
 	super updateRenderFromSelf.
 	camera ifNil: [ ^ self ].
 	camera updateRoassalCamera: roassalShape camera

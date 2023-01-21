@@ -361,13 +361,30 @@ OPDIDiagramElement >> stonProcessSubObjects: block [
 { #category : #accessing }
 OPDIDiagramElement >> stylePropertyNamed: aName ifAbsent: aBlock [
 
+	| nameSymbol |
+	nameSymbol := aName asSymbol.
 	self localStyle ifNotNil: [ :style | 
-		style at: aName ifPresent: [ :value | ^ value ] ].
+		style at: nameSymbol ifPresent: [ :value | ^ value ] ].
 	self sharedStyle ifNotNil: [ :style | 
-		style at: aName ifPresent: [ :value | ^ value ] ].
+		style at: nameSymbol ifPresent: [ :value | ^ value ] ].
 	self owningElement ifNotNil: [ :owner | 
-		^ owner stylePropertyNamed: aName ifAbsent: aBlock ].
+		^ owner stylePropertyNamed: nameSymbol ifAbsent: aBlock ].
 	^ aBlock value
+]
+
+{ #category : #accessing }
+OPDIDiagramElement >> stylePropertyNamed: aName put: aValue [
+
+	self updateFromRender.
+	self localStyle ifNil: [ self localStyle: OPDIOpenPonkStyle new ].
+	self localStyle at: aName asSymbol put: aValue.
+	self updateRenderFromSelf
+]
+
+{ #category : #'as yet unclassified' }
+OPDIDiagramElement >> supportsColorChange [
+
+	^ (self respondsTo: #color) and: [ self respondsTo: #color: ]
 ]
 
 { #category : #accessing }
@@ -397,5 +414,7 @@ OPDIDiagramElement >> updateRenderFromModel [
 { #category : #rendering }
 OPDIDiagramElement >> updateRenderFromSelf [
 
-	self ownedElements do: #updateRenderFromSelf
+	self isRendered ifFalse: [ ^ self ].
+	self ownedElements do: #updateRenderFromSelf.
+	roassalShape signalUpdate
 ]

@@ -45,7 +45,8 @@ OPDIEdgeLabel >> updateRenderFromModel [
 { #category : #roassal }
 OPDIEdgeLabel >> updateRenderFromSelf [
 
-	bounds ifNil: [ ^ self ].
+	self isRendered ifFalse: [ ^ self ].
 	super updateRenderFromSelf.
+	bounds ifNil: [ ^ self ].
 	(roassalShape propertyAt: OPRSAnchorConstraint) saveShapePosition
 ]

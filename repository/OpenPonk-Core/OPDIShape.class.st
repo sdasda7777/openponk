@@ -73,10 +73,12 @@ OPDIShape >> updateFromRender [
 { #category : #roassal }
 OPDIShape >> updateRenderFromSelf [
 
-	bounds ifNil: [ ^ self ].
-	roassalShape
-		extent: bounds extent;
-		translateTo: bounds position
+	self isRendered ifFalse: [ ^ self ].
+	bounds ifNotNil: [ 
+		roassalShape
+			extent: bounds extent;
+			translateTo: bounds position ].
+	super updateRenderFromSelf
 ]
 
 { #category : #accessing }

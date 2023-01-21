@@ -101,8 +101,9 @@ OPDIEdge >> updateFromRender [
 { #category : #'as yet unclassified' }
 OPDIEdge >> updateRenderFromSelf [
 
-	waypoints ifNil: [ ^ self ].
-	roassalShape controlPoints: waypoints
+	self isRendered ifFalse: [ ^ self ].
+	waypoints ifNotNil: [ roassalShape controlPoints: waypoints ].
+	super updateRenderFromSelf
 ]
 
 { #category : #accessing }

@@ -21,6 +21,12 @@ OPDIDiagram >> documentation: anObject [
 	documentation := anObject
 ]
 
+{ #category : #testing }
+OPDIDiagram >> isRendered [
+
+	^ roassalShape isNotNil
+]
+
 { #category : #accessing }
 OPDIDiagram >> name [
 
@@ -74,7 +80,7 @@ OPDIDiagram >> updateFromRender [
 { #category : #'as yet unclassified' }
 OPDIDiagram >> updateRenderFromSelf [
 
-	"do nothing (canvases are infinite in OP)"
-
-	
+	self isRendered ifFalse: [ ^ self ].
+	self ownedElements do: #updateRenderFromSelf.
+	roassalShape signalUpdate
 ]
