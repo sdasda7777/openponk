@@ -74,6 +74,11 @@ OPElementLayout >> = anOtherLayout [
 		  extent = anOtherLayout extent ]
 ]
 
+{ #category : #converting }
+OPElementLayout >> applyToDiagramElement: aDiagramElement [ 
+	self shouldBeImplemented.
+]
+
 { #category : #accessing }
 OPElementLayout >> extent [
 	^ extent

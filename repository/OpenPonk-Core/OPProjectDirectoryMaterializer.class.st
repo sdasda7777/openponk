@@ -74,19 +74,29 @@ OPProjectDirectoryMaterializer >> pluginForName: aName pluginVersion: aVersion [
 { #category : #reading }
 OPProjectDirectoryMaterializer >> readAllMementosFrom: aRootFolder [
 	| references |
-	references := self readModelReferences: aRootFolder.
+	references := self readModelReferences: aRootFolder.	
 	^ references
 		collect: [ :pair | 
 			self
 				readMementoFrom: aRootFolder / 'models' / pair key asString
-				with: pair value serializer ]
+				asPlugin: pair value ]
 ]
 
 { #category : #reading }
-OPProjectDirectoryMaterializer >> readMementoFrom: aFolder with: aSerializer [
-	^ (aSerializer loadMementoFrom: aFolder)
-		ifNil:
-			[ self error: 'Unable to deserialize memento from ' , aFolder asString ]
+OPProjectDirectoryMaterializer >> readMementoFrom: aFolder asPlugin: aPlugin [
+
+	| materializer |
+	materializer := aFolder files
+		                detect: [ :any | 
+		                any basename = OPExportInfo fileName ]
+		                ifFound: [ :exportInfoFile | 
+			                (OPSerializer forExportInfoFile: exportInfoFile)
+				                plugin: aPlugin;
+				                yourself ]
+		                ifNone: [ aPlugin serializer ].
+	^ (materializer loadMementoFrom: aFolder) ifNil: [ 
+		  self error:
+			  'Unable to deserialize memento from ' , aFolder asString ]
 ]
 
 { #category : #reading }
@@ -106,12 +116,13 @@ OPProjectDirectoryMaterializer >> readModelReferences: aRootFolder [
 
 { #category : #reading }
 OPProjectDirectoryMaterializer >> readProjectInfoFrom: aFile [
-	| project json exporter exporterVersion |
+
+	| project json exporter |
 	json := STON fromStream: aFile readStream.
-	exporter := (json at: 'exporter') at: 'exporter'.
-	exporterVersion := (json at: 'exporter') at: 'exporterVersion'.
-	(exporter = self exporter and: [ exporterVersion = exporterVersion ])
-		ifFalse: [ self error: 'Unsupported exporter ' , exporter , ' version ' , exporterVersion ].
+	exporter := (json at: 'export' ifAbsent: [ json at: 'exporter' ]) 
+		            at: 'exporter'.
+	exporter = self exporter ifFalse: [ 
+		self error: 'Unsupported exporter ' , exporter ].
 	project := OPProject new.
 	project name: ((json at: 'project') at: 'name').
 	project uuid: (UUID fromString: ((json at: 'project') at: 'uuid')).

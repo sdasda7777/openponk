@@ -49,11 +49,6 @@ OPProjectDirectorySerializer >> exporter [
 	^ 'OpenPonk'
 ]
 
-{ #category : #accessing }
-OPProjectDirectorySerializer >> exporterVersion [
-	^ OPVersion current fullVersionString
-]
-
 { #category : #writing }
 OPProjectDirectorySerializer >> modelReferencesToJson: models [
 	| references |
@@ -80,7 +75,7 @@ OPProjectDirectorySerializer >> projectToJson: aProject [
 				   ('name' -> aProject name).
 				   ('uuid' -> aProject uuid asString) } asDictionary).
 			  ('export' -> { 
-				   ('exporter' -> self className).
+				   ('exporter' -> self exporter).
 				   ('timestamp' -> DateAndTime now truncated asString) }
 				   asDictionary) } asDictionary
 ]
@@ -114,15 +109,17 @@ OPProjectDirectorySerializer >> saveMementos: aCollection [
 
 { #category : #'private - saving' }
 OPProjectDirectorySerializer >> saveProject: aProject [
+
 	directory ensureCreateDirectory.
+	self class saveExportInfoTo: directory.
 	(directory / 'models') ensureCreateDirectory.
-	(directory / '.history' / 'models') ensureCreateDirectory.
 	(directory / 'project.json')
 		ensureDelete;
 		writeStreamDo: [ :stream | stream << (self projectToJson: aProject) ].
 	(directory / 'models.json')
 		ensureDelete;
-		writeStreamDo: [ :stream | stream << (self modelReferencesToJson: aProject models) ]
+		writeStreamDo: [ :stream | 
+			stream << (self modelReferencesToJson: aProject models) ]
 ]
 
 { #category : #'public - saving' }

@@ -29,6 +29,13 @@ OPLegacyDiagram class >> emptyOfModel: aModel [
 		yourself
 ]
 
+{ #category : #testing }
+OPLegacyDiagram class >> isDeprecated [
+	"Use OPDiagram instead"
+
+	^ true
+]
+
 { #category : #accessing }
 OPLegacyDiagram class >> neoJsonMapping: mapper [
 
@@ -49,7 +56,7 @@ OPLegacyDiagram class >> neoJsonMapping: mapper [
 					element := (self class environment at:
 							            (map at: #className) asSymbol) new.
 					NeoJSONReader
-						fromString: (NeoJSONWriter toString: map)
+						fromString: (OPJsonWriter toString: map)
 						as: element class ] ];
 		for: #ObjectsWithUUIDs
 		customDo: [ :mapping | mapping listOfElementSchema: #ObjectWithUUID ];
@@ -138,6 +145,40 @@ OPLegacyDiagram >> asJson [
 { #category : #serializing }
 OPLegacyDiagram >> asJsonTo: stream [
 	^ (OPJsonWriter on: stream) nextPut: self
+]
+
+{ #category : #converting }
+OPLegacyDiagram >> asOPDiagram [
+
+	| diagram adapters allModelElements layoutsPerModel diagramController |
+	diagram := OPOpenPonkDiagram forModelElement: self model.
+	diagram name: self name.
+	diagram isOpen: self isOpen.
+	diagram isSelected: self isSelected.
+	diagram camera: self camera.
+	adapters := OPNavigatorAdapters new.
+	allModelElements := ((Set with: self model)
+	                     , (adapters allChildrenFor: self model)
+	                     , commonElements collect: [ :each | 
+		                     each uuid -> each ]) asDictionary.
+	visibleElements := visibleElements collect: [ :each | 
+		                   each modelObjectFrom: allModelElements ].
+	layoutsPerModel := layout associations collect: [ :each | 
+		                   (allModelElements at: each key) -> each value ].
+
+	diagramController := (OPPluginRegistry default pluginFor: model)
+		                     diagramControllerClass new.
+	diagramController
+		model: model;
+		diagramElement: diagram.
+	layoutsPerModel do: [ :each | 
+		| controller |
+		controller := diagramController newControllerFor: each key.
+		diagramController addController: controller.
+		controller createDiagramElement.
+		each value applyToDiagramElement: controller diagramElement ].
+	self halt.
+	^ diagram
 ]
 
 { #category : #accessing }

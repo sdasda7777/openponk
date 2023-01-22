@@ -10,6 +10,18 @@ Class {
 }
 
 { #category : #accessing }
+OPExportInfo class >> fileName [
+
+	^ 'export-info.json'
+]
+
+{ #category : #accessing }
+OPExportInfo class >> neoJsonMapping: mapper [
+
+	mapper for: self do: [ :mapping | mapping mapAllInstVars ]
+]
+
+{ #category : #accessing }
 OPExportInfo >> format [
 
 	^ format

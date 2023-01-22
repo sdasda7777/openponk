@@ -42,9 +42,8 @@ OPTestPlugin >> name [
 
 { #category : #accessing }
 OPTestPlugin >> serializer [
-	^ OPMementoDirectorySerializer
-		withModelSerializer: self modelSerializerClass new
-		diagramsSerializer: self diagramSerializerClass new
+
+	^ OPMementoDirectorySerializer forPlugin: self
 ]
 
 { #category : #testing }

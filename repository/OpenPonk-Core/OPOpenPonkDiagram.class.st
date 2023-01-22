@@ -3,7 +3,6 @@ Class {
 	#superclass : #OPDiagram,
 	#instVars : [
 		'isOpen',
-		'order',
 		'isSelected',
 		'camera'
 	],
