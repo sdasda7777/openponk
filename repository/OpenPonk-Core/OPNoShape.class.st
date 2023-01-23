@@ -19,7 +19,8 @@ OPNoShape class >> renderToPosition: aPoint onCanvas: aCanvas [
 { #category : #rendering }
 OPNoShape >> removeRender [
 
-	canvas announcer unsubscribe: self.
+	self isRendered ifFalse: [ ^ self ].
+	roassalShape canvas announcer unsubscribe: self.
 	super removeRender
 ]
 
@@ -29,12 +30,16 @@ OPNoShape >> renderBasicShape [
 	roassalShape := RSBox new
 		                color: Color transparent;
 		                borderColor: Color transparent;
-		                yourself.
+		                yourself
+]
 
-	moveSubscription := canvas when: RSMouseMove do: [ :event | 
-		                    roassalShape
-			                    translateTo: event position;
-			                    signalUpdate ].
+{ #category : #rendering }
+OPNoShape >> renderShapeDetails [
 
-	canvas add: roassalShape
+	moveSubscription := roassalShape canvas
+		                    when: RSMouseMove
+		                    do: [ :event | 
+			                    roassalShape
+				                    translateTo: event position;
+				                    signalUpdate ]
 ]

@@ -74,8 +74,7 @@ OPLabel >> renderBasicShape [
 		text: self text;
 		emphasis: self emphasis;
 		model: self;
-		yourself.
-	canvas add: roassalShape
+		yourself
 ]
 
 { #category : #accessing }

@@ -50,6 +50,7 @@ OPRSAnchorConstraint >> balance: aNumber [
 OPRSAnchorConstraint >> build [
 
 	shape propertyAt: self class put: self.
+	shape when: RSShapeRemovedEvent do: [ self remove ].
 	line when: RSShapeRemovedEvent do: [ self remove ].
 	line from when: RSPositionChangedEvent do: [ self moveShape ].
 	line to when: RSPositionChangedEvent do: [ self moveShape ].

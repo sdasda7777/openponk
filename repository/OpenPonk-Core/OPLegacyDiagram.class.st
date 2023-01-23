@@ -150,7 +150,7 @@ OPLegacyDiagram >> asJsonTo: stream [
 { #category : #converting }
 OPLegacyDiagram >> asOPDiagram [
 
-	| diagram adapters allModelElements layoutsPerModel diagramController |
+	| diagram adapters allModelElements layoutsPerModel diagramController canvas layoutsPerController |
 	diagram := OPOpenPonkDiagram forModelElement: self model.
 	diagram name: self name.
 	diagram isOpen: self isOpen.
@@ -171,13 +171,19 @@ OPLegacyDiagram >> asOPDiagram [
 	diagramController
 		model: model;
 		diagramElement: diagram.
-	layoutsPerModel do: [ :each | 
-		| controller |
-		controller := diagramController newControllerFor: each key.
-		diagramController addController: controller.
-		controller createDiagramElement.
-		each value applyToDiagramElement: controller diagramElement ].
-	self halt.
+	canvas := RSCanvas new.
+	layoutsPerController := layoutsPerModel collect: [ :each | 
+		                        | controller diagramElement |
+		                        controller := diagramController 
+			                                      newControllerFor: each key.
+		                        diagramController addController: controller.
+		                        controller createDiagramElement.
+		                        diagramElement := controller diagramElement.
+		                        controller -> each value ].
+	diagram renderIn: canvas.
+	layoutsPerController do: [ :each | 
+		each value applyToDiagramElement: each key diagramElement ].
+	diagram removeRender.
 	^ diagram
 ]
 

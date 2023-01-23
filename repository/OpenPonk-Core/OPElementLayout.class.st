@@ -75,8 +75,14 @@ OPElementLayout >> = anOtherLayout [
 ]
 
 { #category : #converting }
-OPElementLayout >> applyToDiagramElement: aDiagramElement [ 
-	self shouldBeImplemented.
+OPElementLayout >> applyToDiagramElement: aDiagramElement [
+
+	position
+		ifNil: [ path ifNotNil: [ aDiagramElement waypoints: path points ] ]
+		ifNotNil: [ 
+			aDiagramElement bounds: (OPDIBounds
+					 withPosition: position
+					 extent: (extent ifNil: [ aDiagramElement roassalShape extent ])) ]
 ]
 
 { #category : #accessing }

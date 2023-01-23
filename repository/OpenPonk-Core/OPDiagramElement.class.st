@@ -9,8 +9,7 @@ Class {
 		'sharedStyle',
 		'localStyle',
 		'ownedElements',
-		'roassalShape',
-		'canvas'
+		'roassalShape'
 	],
 	#category : #'OpenPonk-Core-DiagramInterchange'
 }
@@ -58,7 +57,7 @@ OPDiagramElement class >> stonAllInstVarNames [
 { #category : #accessing }
 OPDiagramElement >> canvas [
 
-	^ canvas
+	^ roassalShape canvas
 ]
 
 { #category : #'as yet unclassified' }
@@ -162,10 +161,7 @@ OPDiagramElement >> modelElements: aCollection [
 { #category : #'as yet unclassified' }
 OPDiagramElement >> ownedElementRenderedIn: aCanvas [
 
-	canvas ifNil: [ ^ canvas := aCanvas ].
-	canvas = aCanvas ifFalse: [ 
-		self error:
-			'Reusing same diagram element for 2 canvases not allowed' ]
+	"do nothing by default"
 ]
 
 { #category : #accessing }
@@ -225,13 +221,13 @@ OPDiagramElement >> renderBasicShape [
 { #category : #rendering }
 OPDiagramElement >> renderBasicShapeIn: aCanvas [
 
-	canvas ifNotNil: [ 
-		canvas = aCanvas ifFalse: [ 
+	self isRendered ifTrue: [ 
+		roassalShape canvas = aCanvas ifFalse: [ 
 			self error:
 				'Reusing same diagram element for 2 canvases not allowed' ].
-		self isRendered ifTrue: [ ^ self ] ].
-	canvas := aCanvas.
+		^ self ].
 	self renderBasicShape.
+	aCanvas add: roassalShape.
 	^ roassalShape
 ]
 

@@ -42,8 +42,11 @@ OPDiagram >> name: anObject [
 { #category : #'as yet unclassified' }
 OPDiagram >> ownedElementRenderedIn: aCanvas [
 
-	roassalShape ifNotNil: [ ^ self ].
-	super ownedElementRenderedIn: aCanvas.
+	self isRendered ifTrue: [ 
+		roassalShape canvas = aCanvas ifFalse: [ 
+			self error:
+				'Reusing same diagram element for 2 canvases not allowed' ].
+		^ self ].
 	roassalShape := aCanvas.
 	self updateRenderFromSelf
 ]
@@ -51,9 +54,18 @@ OPDiagram >> ownedElementRenderedIn: aCanvas [
 { #category : #rendering }
 OPDiagram >> renderBasicShape [
 
-	"there is currently no way to render a diagram directly (only update existing Roassal canvas)"
+	"diagram cannot be rendered directly now, only its owned elements"
 
-	^ self notYetImplemented
+	
+]
+
+{ #category : #rendering }
+OPDiagram >> renderBasicShapeIn: aCanvas [
+
+	self isRendered ifTrue: [ 
+		roassalShape canvas = aCanvas ifFalse: [ 
+			self error:
+				'Reusing same diagram element for 2 canvases not allowed' ] ]
 ]
 
 { #category : #accessing }
