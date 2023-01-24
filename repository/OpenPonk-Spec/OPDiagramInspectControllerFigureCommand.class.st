@@ -28,6 +28,6 @@ OPDiagramInspectControllerFigureCommand >> defaultMenuItemName [
 { #category : #execution }
 OPDiagramInspectControllerFigureCommand >> execute [
 
-	(figures collect: [ :each | 
-		 diagramController controllerForRoassalShape: each ]) inspect
+	controllers size = 1 ifTrue: [ ^ controllers anyOne inspect ].
+	^ controllers inspect
 ]

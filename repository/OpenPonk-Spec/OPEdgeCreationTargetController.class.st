@@ -5,7 +5,7 @@ Class {
 		'edgeController',
 		'diagramElement'
 	],
-	#category : #'OpenPonk-Roassal3'
+	#category : #'OpenPonk-Spec'
 }
 
 { #category : #rendering }

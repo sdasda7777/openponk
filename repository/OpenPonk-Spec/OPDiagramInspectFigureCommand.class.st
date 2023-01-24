@@ -22,5 +22,6 @@ OPDiagramInspectFigureCommand >> defaultMenuItemName [
 { #category : #execution }
 OPDiagramInspectFigureCommand >> execute [
 
-	figures inspect
+	figures size = 1 ifTrue: [ ^ figures anyOne inspect ].
+	^ figures inspect
 ]
